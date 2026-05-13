@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a3a5c">
+<link rel="manifest" href="manifest.json">
+<title>Arsenal Farmacológico APS · SSVSA</title>
+<style>
+:root{
+  --azul:#1a3a5c; --azul-med:#2563a8; --azul-c:#dbeafe;
+  --verde:#15803d; --verde-c:#dcfce7;
+  --naranja:#c2410c; --naranja-c:#ffedd5;
+  --violeta:#7c3aed; --violeta-c:#ede9fe;
+  --cian:#0891b2; --cian-c:#ecfeff;
+  --rojo:#dc2626; --rojo-c:#fee2e2;
+  --gris:#f1f5f9; --borde:#e2e8f0;
+  --texto:#0f172a; --texto-sec:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--texto);}
+
+/* HEADER */
+.header{background:var(--azul);color:white;padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.35);}
+.header-icon{width:40px;height:40px;background:var(--azul-med);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.header-text h1{font-size:15px;font-weight:700;}
+.header-text p{font-size:10px;opacity:.72;margin-top:1px;}
+.header-count{margin-left:auto;background:rgba(255,255,255,.15);border-radius:8px;padding:5px 12px;text-align:center;flex-shrink:0;}
+.header-count span{font-size:20px;font-weight:800;display:block;line-height:1;}
+.header-count small{font-size:10px;opacity:.8;}
+
+/* TABS */
+.tabs{display:flex;background:white;border-bottom:2px solid var(--borde);}
+.tab{flex:1;padding:11px 8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--texto-sec);text-align:center;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab.activo{color:var(--azul-med);border-bottom-color:var(--azul-med);}
+.tab:hover:not(.activo){background:var(--gris);}
+
+/* FILTROS */
+.filtros-wrap{padding:12px 14px;background:white;border-bottom:1px solid var(--borde);}
+.busqueda{display:flex;gap:8px;margin-bottom:10px;}
+.busqueda input{flex:1;padding:9px 13px;border:2px solid var(--borde);border-radius:10px;font-size:14px;outline:none;transition:border-color .2s;}
+.busqueda input:focus{border-color:var(--azul-med);}
+.btn-limpiar{background:var(--verde);border:none;border-radius:10px;padding:11px 20px;font-size:15px;font-weight:700;cursor:pointer;color:white;white-space:nowrap;}
+.btn-limpiar:hover{background:#166534;}
+.filtros-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:7px;margin-bottom:10px;}
+.filtros-grid select{padding:8px 10px;border:1px solid var(--borde);border-radius:8px;font-size:13px;background:white;color:var(--texto);cursor:pointer;outline:none;}
+.filtros-grid select:focus{border-color:var(--azul-med);}
+
+/* CHIPS ESTABLECIMIENTO */
+.chips-label{font-size:11px;font-weight:700;color:var(--texto-sec);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{padding:5px 13px;border-radius:20px;border:2px solid var(--borde);background:white;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--texto-sec);}
+.chip:hover{border-color:var(--azul-med);color:var(--azul-med);}
+.chip.activo-todos {background:var(--texto);   border-color:var(--texto);   color:white;}
+.chip.activo-aps   {background:var(--azul);    border-color:var(--azul);    color:white;}
+.chip.activo-sapu  {background:var(--violeta); border-color:var(--violeta); color:white;}
+.chip.activo-sar   {background:var(--cian);    border-color:var(--cian);    color:white;}
+.chip.activo-sur   {background:var(--verde);   border-color:var(--verde);   color:white;}
+.chip.activo-cecof {background:var(--naranja); border-color:var(--naranja); color:white;}
+
+/* LEYENDA */
+.leyenda{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;padding:8px 12px;background:var(--gris);border-radius:8px;font-size:11px;color:var(--texto-sec);align-items:center;}
+.ley-item{display:flex;align-items:center;gap:5px;}
+
+/* LISTA */
+.main{width:100%;padding:14px 16px;}
+.seccion-titulo{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--azul-med);margin:18px 0 7px;padding-left:10px;border-left:3px solid var(--azul-med);}
+
+/* CARD FÁRMACO */
+.card-farm{background:white;border:1px solid var(--borde);border-radius:12px;padding:14px 16px;margin-bottom:8px;transition:box-shadow .15s;}
+.card-farm:hover{box-shadow:0 4px 14px rgba(0,0,0,.10);}
+.farm-top{display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:0;border:2px solid var(--borde);border-radius:8px;overflow:hidden;margin-bottom:10px;}
+.farm-nombre-box{padding:10px 14px;border-right:2px solid var(--borde);background:#f8fafc;}
+.farm-nombre{font-size:14px;font-weight:800;color:var(--texto);}
+.farm-forma-box{padding:10px 14px;border-right:2px solid var(--borde);background:#eff6ff;}
+.farm-forma{font-size:13px;color:var(--azul-med);font-weight:500;}
+.farm-dosis{background:var(--azul);color:white;font-size:13px;font-weight:800;padding:10px 18px;white-space:nowrap;letter-spacing:.02em;align-self:stretch;display:flex;align-items:center;}
+.farm-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+
+/* BADGE PROFESIONAL */
+.badge-prof{font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;display:inline-flex;align-items:center;gap:4px;}
+.badge-prof.libre{background:#f0fdf4;color:var(--verde);border:1px solid #bbf7d0;}
+.badge-prof.restringido{background:var(--rojo-c);color:var(--rojo);border:1px solid #fecaca;}
+
+/* BADGES ESTABLECIMIENTO */
+.badge-af{font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap;}
+.af-aps  {background:#eff6ff;color:#1d4ed8;}
+.af-sapu {background:var(--violeta-c);color:var(--violeta);}
+.af-sar  {background:var(--cian-c);color:var(--cian);}
+.af-sur  {background:var(--verde-c);color:var(--verde);}
+.af-cecof{background:var(--naranja-c);color:var(--naranja);}
+
+.farm-obs{margin-top:8px;font-size:12px;font-weight:700;color:var(--texto-sec);background:var(--gris);border-radius:6px;padding:6px 10px;border-left:3px solid var(--borde);}
+.farm-obs.jf{border-left-color:var(--naranja);color:var(--naranja);font-weight:600;background:var(--naranja-c);}
+
+/* CARD VACUNA */
+.card-farm.invierno{border-left:4px solid var(--cian);}
+.card-vac{background:white;border:1px solid var(--borde);border-left:4px solid var(--verde);border-radius:14px;padding:18px 20px;margin-bottom:10px;transition:box-shadow .15s;}
+.card-vac.invierno{border-left-color:var(--cian);}
+.card-vac:hover{box-shadow:0 4px 14px rgba(0,0,0,.10);}
+.vac-nombre{font-size:14px;font-weight:700;}
+.vac-meta{font-size:12px;color:var(--texto-sec);margin-top:3px;}
+.vac-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--texto-sec);}
+.empty .icon{font-size:48px;margin-bottom:12px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1e293b;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;transition:transform .3s;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@media(max-width:600px){
+  .header-text h1{font-size:13px;}
+  .filtros-grid{grid-template-columns:1fr 1fr;}
+  .main{padding:10px 8px;}
+  .farm-top{grid-template-columns:1fr 1fr auto !important;}
+  .farm-nombre-box{padding:8px 10px;}
+  .farm-forma-box{padding:8px 10px;}
+  .farm-nombre{font-size:12px;}
+  .farm-forma{font-size:11px;}
+  .farm-dosis{font-size:11px;padding:8px 10px;}
+  .badge-af{font-size:10px;padding:2px 6px;}
+  .badge-prof{font-size:10px;padding:2px 7px;}
+  .farm-obs{font-size:11px;}
+  .seccion-titulo{font-size:10px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">💊</div>
+  <div class="header-text">
+    <h1>Arsenal Farmacológico APS</h1>
+    <p>Servicio de Salud Valparaíso – San Antonio · 2024–2025</p>
+  </div>
+  <div class="header-count">
+    <span id="cnt">—</span>
+    <small id="cnt-label">resultados</small>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab activo" id="tab-farm" onclick="cambiarTab('farmacos')">💊 Fármacos</div>
+  <div class="tab"        id="tab-vac"  onclick="cambiarTab('vacunas')">💉 Vacunas</div>
+</div>
+
+<div class="filtros-wrap">
+  <div class="busqueda">
+    <input id="busq" type="search" placeholder="🔍  Buscar nombre, forma, observación…" oninput="filtrar()">
+  </div>
+
+
+  <!-- Filtros fármacos -->
+  <div id="filtros-farm">
+    <div class="filtros-grid">
+      <select id="sel-cat"         onchange="filtrar()"><option value="">Todas las categorías</option></select>
+      <select id="sel-forma"       onchange="filtrar()"><option value="">Todas las formas farmacéuticas</option></select>
+      <select id="sel-prof"        onchange="filtrar()">
+        <option value="">Todos los profesionales</option>
+        <option value="MG">Médico General (MG)</option>
+        <option value="ME">Médico Especialista (ME)</option>
+        <option value="CD">Cirujano Dentista (CD)</option>
+        <option value="MAT">Matrona (MAT)</option>
+      </select>
+      <select id="sel-restriccion" onchange="filtrar()">
+        <option value="">Con y sin restricción</option>
+        <option value="si">Solo con restricción (ME)</option>
+        <option value="no">Sin restricción de especialista</option>
+      </select>
+      <button class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
+    </div>
+    <div class="chips-label">Filtrar por establecimiento:</div>
+    <div class="chips" id="chips-farm">
+      <span class="chip activo-todos" id="chip-todos" onclick="toggleTodos()">Todos</span>
+      <span class="chip" id="chip-aps"   onclick="toggleChip('aps')"  >🏥 APS</span>
+      <span class="chip" id="chip-sapu"  onclick="toggleChip('sapu')" >🚑 SAPU</span>
+      <span class="chip" id="chip-sar"   onclick="toggleChip('sar')"  >🏨 SAR</span>
+      <span class="chip" id="chip-sur"   onclick="toggleChip('sur')"  >🏩 SUR</span>
+      <span class="chip" id="chip-cecof" onclick="toggleChip('cecof')">🏘️ CECOF</span>
+    </div>
+    <div class="leyenda">
+      <strong>Profesional:</strong>
+      <span class="ley-item"><span class="badge-prof libre">MG</span> Sin restricción</span>
+      <span class="ley-item"><span class="badge-prof restringido">⚠️ ME/MG</span> Requiere especialista o protocolo</span>
+      <span class="ley-item"><span class="badge-prof restringido">⚠️ ME</span> Solo especialista</span>
+    </div>
+  </div>
+
+  <!-- Filtros vacunas -->
+  <div id="filtros-vac" style="display:none">
+    <div class="filtros-grid">
+      <select id="sel-vac-tipo" onchange="filtrar()">
+        <option value="">Todos los tipos</option>
+        <option value="Campaña de Invierno">Campaña de Invierno</option>
+        <option value="VACUNA / INMUNOGLOBULINA">Vacunas e Inmunoglobulinas</option>
+      </select>
+      <button class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
+    </div>
+    <div class="chips-label">Filtrar por establecimiento:</div>
+    <div class="chips" id="chips-vac">
+      <span class="chip activo-todos" id="chip-vac-todos" onclick="toggleTodos()">Todos</span>
+      <span class="chip" id="chip-vac-aps"   onclick="toggleChip('aps')"  >🏥 APS</span>
+      <span class="chip" id="chip-vac-sapu"  onclick="toggleChip('sapu')" >🚑 SAPU</span>
+      <span class="chip" id="chip-vac-sar"   onclick="toggleChip('sar')"  >🏨 SAR</span>
+      <span class="chip" id="chip-vac-sur"   onclick="toggleChip('sur')"  >🏩 SUR</span>
+      <span class="chip" id="chip-vac-cecof" onclick="toggleChip('cecof')">🏘️ CECOF</span>
+    </div>
+  </div>
+</div>
+
+<div class="main" id="lista"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const FARMACOS=[{"cat": "Anestésicos locales", "nombre": "BENZOCAÍNA", "forma": "Gel Oral", "dosis": "20%", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Uso odontológico exclusivo"}, {"cat": "Anestésicos locales", "nombre": "LIDOCAÍNA", "forma": "Solución tópica (Spray)", "dosis": "10%", "prof": "ME/MG/CD", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Anestésicos locales", "nombre": "LIDOCAÍNA (Clorhidrato)", "forma": "Solución Inyectable", "dosis": "2%", "prof": "MG/MAT", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "MAT capacitada p/implantar Anticonceptivo Subcutáneo"}, {"cat": "Anestésicos locales", "nombre": "LIDOCAÍNA (Clorhidrato)", "forma": "Sol. Inyect. c/ Vasoconstrictor", "dosis": "2%", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Uso odontológico exclusivo / SAPU DENT"}, {"cat": "Anestésicos locales", "nombre": "MEPIVACAÍNA", "forma": "Sol. Inyect. c/ Epinefrina 1/100.000", "dosis": "2%", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Uso odontológico exclusivo / SAPU DENT"}, {"cat": "Anestésicos locales", "nombre": "MEPIVACAÍNA", "forma": "Sol. Inyect. s/ Vasoconstrictor", "dosis": "3%", "prof": "MG/CD/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Premedicación anestésica", "nombre": "DIAZEPAM (b)", "forma": "Solución Inyectable", "dosis": "10 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 0, "obs": ""}, {"cat": "Premedicación anestésica", "nombre": "MIDAZOLAM (Clorhidrato) (b)", "forma": "Solución Inyectable", "dosis": "5 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 0, "obs": "Exclusivo para Carro de Reanimación CP"}, {"cat": "Relajantes musculares", "nombre": "CICLOBENZAPRINA (Clorhidrato)", "forma": "Comprimido Recubierto", "dosis": "10 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Relajantes musculares", "nombre": "SUXAMETONIO (Cloruro)", "forma": "Polvo para Solución Inyectable", "dosis": "100 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Exclusivo para Carro de Reanimación CP"}, {"cat": "Analgésicos no opiáceos", "nombre": "CELECOXIB", "forma": "Comprimido", "dosis": "200 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Artrosis / Cuidados Paliativos Universales / Según protocolo"}, {"cat": "Analgésicos no opiáceos", "nombre": "CLONIXINATO DE LISINA", "forma": "Comprimido", "dosis": "125 mg", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Uso odontológico exclusivo"}, {"cat": "Analgésicos no opiáceos", "nombre": "DICLOFENACO (Dietilamina)", "forma": "Gel tópico", "dosis": "1,16%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo usuarios > 55 años inscritos PM Artrosis"}, {"cat": "Analgésicos no opiáceos", "nombre": "DICLOFENACO (Sódico)", "forma": "Comprimido", "dosis": "50 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "DICLOFENACO (Sódico)", "forma": "Solución Inyectable", "dosis": "75 mg/3mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Uso por CD en alergia a metamizol"}, {"cat": "Analgésicos no opiáceos", "nombre": "DICLOFENACO (Sódico)", "forma": "Supositorio infantil", "dosis": "12,5 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "IBUPROFENO", "forma": "Gragea", "dosis": "400 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "IBUPROFENO", "forma": "Suspensión Oral", "dosis": "100 mg/5mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "KETOROLACO", "forma": "Solución Inyectable", "dosis": "30 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "KETOROLACO", "forma": "Comprimido", "dosis": "30 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Cuidados Paliativos Universales"}, {"cat": "Analgésicos no opiáceos", "nombre": "MELOXICAM", "forma": "Comprimido", "dosis": "7,5 mg", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Uso odontológico exclusivo"}, {"cat": "Analgésicos no opiáceos", "nombre": "MELOXICAM", "forma": "Comprimido", "dosis": "15 mg", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Uso odontológico exclusivo"}, {"cat": "Analgésicos no opiáceos", "nombre": "METAMIZOL (Sódico)", "forma": "Comprimido", "dosis": "300 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "METAMIZOL (Sódico)", "forma": "Solución Inyectable", "dosis": "1 g/2mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "METAMIZOL (Sódico)", "forma": "Supositorio", "dosis": "250 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "PARACETAMOL", "forma": "Comprimido", "dosis": "500 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "PARACETAMOL", "forma": "Comprimido", "dosis": "80–100 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "PARACETAMOL", "forma": "Solución Oral gotas", "dosis": "100 mg/mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "PARACETAMOL", "forma": "Supositorio", "dosis": "125 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos no opiáceos", "nombre": "PREGABALINA", "forma": "Comprimido", "dosis": "75 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Según protocolo de uso"}, {"cat": "Analgésicos no opiáceos", "nombre": "ÁCIDO ACETILSALICÍLICO", "forma": "Comprimido", "dosis": "100 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "GES"}, {"cat": "Analgésicos no opiáceos", "nombre": "ÁCIDO ACETILSALICÍLICO", "forma": "Comprimido", "dosis": "500 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Analgésicos opiáceos", "nombre": "BUPRENORFINA (b)", "forma": "Parche transdérmico", "dosis": "35 mcg/h", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Cuidados Paliativos Universales"}, {"cat": "Analgésicos opiáceos", "nombre": "FENTANILO (b)", "forma": "Solución Inyectable", "dosis": "0,1 mg/2mL", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo uso Urgencia HSJ, SAR y SUR JF según protocolo"}, {"cat": "Analgésicos opiáceos", "nombre": "MORFINA (Clorhidrato) (a)", "forma": "Solución Inyectable", "dosis": "10 mg/mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "GES IAM / Cuidados Paliativos Universales"}, {"cat": "Analgésicos opiáceos", "nombre": "MORFINA (Clorhidrato) (a)", "forma": "Solución oral", "dosis": "20 mg/mL", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Cuidados Paliativos Universales"}, {"cat": "Analgésicos opiáceos", "nombre": "TRAMADOL (Clorhidrato)", "forma": "Comprimido", "dosis": "50 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES / PM Artrosis / Cuidados Paliativos Universales"}, {"cat": "Analgésicos opiáceos", "nombre": "TRAMADOL (Clorhidrato)", "forma": "Solución Oral gotas", "dosis": "100 mg/mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES / PM Artrosis / Cuidados Paliativos Universales"}, {"cat": "Analgésicos opiáceos", "nombre": "TRAMADOL (Clorhidrato)", "forma": "Solución Inyectable", "dosis": "100 mg/mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Cuidados Paliativos Universales"}, {"cat": "Antigotosos", "nombre": "ALOPURINOL", "forma": "Comprimido", "dosis": "100 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Para continuidad de tratamiento paciente contrareferido"}, {"cat": "Antihistamínicos H1", "nombre": "CETIRIZINA", "forma": "Comprimido", "dosis": "10 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPORRINO"}, {"cat": "Antihistamínicos H1", "nombre": "CLORFENAMINA", "forma": "Comprimido", "dosis": "4 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antihistamínicos H1", "nombre": "CLORFENAMINA", "forma": "Solución Inyectable", "dosis": "10 mg/mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antihistamínicos H1", "nombre": "DESLORATADINA", "forma": "Comprimido", "dosis": "5 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM IRA/ERA. Alternativa: Cetirizina CM 10 mg"}, {"cat": "Antihistamínicos H1", "nombre": "HIDROXICINA", "forma": "Comprimido", "dosis": "20 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antihistamínicos H1", "nombre": "HIDROXICINA", "forma": "Jarabe", "dosis": "10 mg/5mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antihistamínicos H1", "nombre": "LORATADINA", "forma": "Comprimido", "dosis": "10 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antihistamínicos H1", "nombre": "LORATADINA", "forma": "Jarabe", "dosis": "5 mg/5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Restricción sólo en mayores de 2 años"}, {"cat": "Anafilaxia / Glucocorticoides", "nombre": "EPINEFRINA (Clorhidrato)", "forma": "Solución Inyectable", "dosis": "1 mg/mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Anafilaxia / Glucocorticoides", "nombre": "HIDROCORTISONA (Succinato)", "forma": "Polvo para Solución Inyectable", "dosis": "100 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Anafilaxia / Glucocorticoides", "nombre": "PREDNISONA", "forma": "Comprimido", "dosis": "5 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Anafilaxia / Glucocorticoides", "nombre": "PREDNISONA", "forma": "Comprimido", "dosis": "20 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Anafilaxia / Glucocorticoides", "nombre": "PREDNISONA", "forma": "Suspensión oral", "dosis": "20 mg/5mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "PM IRA / GES Asma < 15 años"}, {"cat": "Antídotos / Intoxicaciones", "nombre": "ATROPINA Sulfato", "forma": "Solución Inyectable", "dosis": "1 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antídotos / Intoxicaciones", "nombre": "CARBÓN ACTIVADO", "forma": "Polvo para suspensión oral", "dosis": "—", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Producto Oficinal"}, {"cat": "Antídotos / Intoxicaciones", "nombre": "FLUMAZENILO", "forma": "Solución Inyectable", "dosis": "0,5 mg/5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antídotos / Intoxicaciones", "nombre": "NALOXONA", "forma": "Solución Inyectable", "dosis": "0,4 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Anticonvulsivantes", "nombre": "CARBAMAZEPINA", "forma": "Comprimido", "dosis": "200 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia. Otros diagnósticos (no financiados PM EPI)"}, {"cat": "Anticonvulsivantes", "nombre": "CARBAMAZEPINA", "forma": "Comprimido Lib. Prolongada", "dosis": "400 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "CLONAZEPAM (b)", "forma": "Comprimido", "dosis": "2 mg", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES / PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "FENITOÍNA (Sódica)", "forma": "Comprimido", "dosis": "100 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Anticonvulsivantes", "nombre": "FENOBARBITAL (b)", "forma": "Comprimido", "dosis": "15 mg", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Anticonvulsivantes", "nombre": "FENOBARBITAL (b)", "forma": "Comprimido", "dosis": "100 mg", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Anticonvulsivantes", "nombre": "LAMOTRIGINA", "forma": "Comprimido", "dosis": "50 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "LAMOTRIGINA", "forma": "Comprimido", "dosis": "100 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "LEVETIRACETAM", "forma": "Comprimido", "dosis": "500 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "LEVETIRACETAM", "forma": "Comprimido", "dosis": "1000 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "LEVETIRACETAM", "forma": "Suspensión oral", "dosis": "100 mg/mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "ÁCIDO VALPROICO", "forma": "Comprimido", "dosis": "200 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "ÁCIDO VALPROICO", "forma": "Solución Oral gotas", "dosis": "375 mg/mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "ÁCIDO VALPROICO", "forma": "Jarabe", "dosis": "250 mg/5mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Anticonvulsivantes", "nombre": "ÁCIDO VALPROICO", "forma": "Comprimido Lib. Prolongada", "dosis": "500 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Epilepsia"}, {"cat": "Antiparasitarios", "nombre": "ALBENDAZOL", "forma": "Comprimido", "dosis": "200 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Para paciente con examen clínico o laboratorio (+)"}, {"cat": "Antiparasitarios", "nombre": "MEBENDAZOL", "forma": "Suspensión oral", "dosis": "100 mg/5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Beta lactámicos", "nombre": "AMOXICILINA", "forma": "Cápsula", "dosis": "500 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Beta lactámicos", "nombre": "AMOXICILINA", "forma": "Polvo para suspensión oral", "dosis": "500 mg/5mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Beta lactámicos", "nombre": "AMOXICILINA + ÁCIDO CLAVULÁNICO", "forma": "Comprimido", "dosis": "875+125 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "GES / Antibiótico 2ª línea. UAPORRINO"}, {"cat": "Beta lactámicos", "nombre": "AMOXICILINA + ÁCIDO CLAVULÁNICO", "forma": "Polvo suspensión oral", "dosis": "800+57 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "GES / Antibiótico 2ª línea"}, {"cat": "Beta lactámicos", "nombre": "AMOXICILINA + ÁCIDO CLAVULÁNICO", "forma": "Polvo suspensión oral", "dosis": "250+62,5 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "GES / Antibiótico 2ª línea"}, {"cat": "Beta lactámicos", "nombre": "AMOXICILINA + ÁCIDO CLAVULÁNICO", "forma": "Comprimido", "dosis": "500+125 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "GES / Antibiótico 2ª línea"}, {"cat": "Beta lactámicos", "nombre": "BENCILPENICILINA", "forma": "Polvo para Solución Inyectable", "dosis": "1.000.000 UI", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Beta lactámicos", "nombre": "BENZATINA BENCILPENICILINA", "forma": "Polvo para Solución Inyectable", "dosis": "1.200.000 UI", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Uso exclusivo en Sífilis"}, {"cat": "Beta lactámicos", "nombre": "CLOXACILINA (Sódica)", "forma": "Cápsula", "dosis": "500 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Beta lactámicos", "nombre": "FLUCLOXACILINA", "forma": "Polvo para suspensión oral", "dosis": "250 mg/5mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Cefalosporinas", "nombre": "CEFADROXILO", "forma": "Comprimido", "dosis": "500 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Cefalosporinas", "nombre": "CEFADROXILO", "forma": "Suspensión Oral", "dosis": "250 mg/5mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Aminoglicósidos", "nombre": "GENTAMICINA (Sulfato)", "forma": "Solución Inyectable", "dosis": "80 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aminoglicósidos", "nombre": "GENTAMICINA (Sulfato)", "forma": "Solución Oftálmica", "dosis": "0,3%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aminoglicósidos", "nombre": "GENTAMICINA (Sulfato)", "forma": "Ungüento Oftálmico", "dosis": "0,3%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Macrólidos", "nombre": "AZITROMICINA", "forma": "Comprimido", "dosis": "500 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Macrólidos", "nombre": "CLARITROMICINA", "forma": "Comprimido", "dosis": "500 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "GES. Reemplaza Eritromicina"}, {"cat": "Macrólidos", "nombre": "CLARITROMICINA", "forma": "Polvo para suspensión oral", "dosis": "250 mg/5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "GES. Reemplaza Eritromicina"}, {"cat": "Sulfonamidas", "nombre": "COTRIMOXAZOL", "forma": "Comprimido", "dosis": "SMT 800+TMP 160 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Sulfonamidas", "nombre": "COTRIMOXAZOL", "forma": "Suspensión oral", "dosis": "SMT 200+TMP 40 mg/5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Sulfonamidas", "nombre": "SULFADIAZINA DE PLATA", "forma": "Crema", "dosis": "1%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Quinolonas", "nombre": "CIPROFLOXACINO (Clorhidrato)", "forma": "Comprimido", "dosis": "500 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "No usar en 1° trimestre embarazo"}, {"cat": "Quinolonas", "nombre": "CIPROFLOXACINO (Clorhidrato)", "forma": "Gotas óticas", "dosis": "0,3%", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPORRINO"}, {"cat": "Otros antibacterianos", "nombre": "CLINDAMICINA (Clorhidrato)", "forma": "Cápsula", "dosis": "300 mg", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES / Exclusivo uso odontológico según protocolo"}, {"cat": "Otros antibacterianos", "nombre": "DOXICICLINA", "forma": "Comprimido", "dosis": "100 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Otros antibacterianos", "nombre": "NITROFURANTOÍNA", "forma": "Comprimido", "dosis": "100 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Otros antibacterianos", "nombre": "TETRACICLINA (Clorhidrato)", "forma": "Cápsula", "dosis": "250 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antituberculosos", "nombre": "ETAMBUTOL (Clorhidrato)", "forma": "Comprimido", "dosis": "400 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Tuberculosis"}, {"cat": "Antituberculosos", "nombre": "ISONIAZIDA", "forma": "Comprimido", "dosis": "100 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Tuberculosis"}, {"cat": "Antituberculosos", "nombre": "ISONIAZIDA", "forma": "Comprimido dispersable", "dosis": "100 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Tuberculosis"}, {"cat": "Antituberculosos", "nombre": "ISONIAZIDA", "forma": "Solución Oral", "dosis": "200 mg/5mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Tuberculosis"}, {"cat": "Antituberculosos", "nombre": "LEVOFLOXACINO", "forma": "Comprimido", "dosis": "500 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Tuberculosis - MDR"}, {"cat": "Antituberculosos", "nombre": "PIRAZINAMIDA", "forma": "Comprimido", "dosis": "500 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Tuberculosis"}, {"cat": "Antituberculosos", "nombre": "RIFAMPICINA", "forma": "Cápsula", "dosis": "150 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Tuberculosis"}, {"cat": "Antituberculosos", "nombre": "RIFAMPICINA/ISONIAZIDA/PIRAZINAMIDA/ETAMBUTOL", "forma": "Comprimido", "dosis": "150/75/400/275 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Tuberculosis"}, {"cat": "Antifúngicos", "nombre": "CLOTRIMAZOL", "forma": "Óvulo vaginal", "dosis": "100 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antifúngicos", "nombre": "CLOTRIMAZOL", "forma": "Crema", "dosis": "1%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antifúngicos", "nombre": "FLUCONAZOL", "forma": "Cápsula", "dosis": "150–200 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Para paciente > 50 años"}, {"cat": "Antifúngicos", "nombre": "TERBINAFINA (Clorhidrato)", "forma": "Comprimido", "dosis": "250 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Usar 3 meses; si no hay respuesta derivar a Teledermatología"}, {"cat": "Antivirales", "nombre": "ACICLOVIR", "forma": "Suspensión oral", "dosis": "200 mg/5mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antivirales", "nombre": "ACICLOVIR", "forma": "Comprimido", "dosis": "800 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antivirales", "nombre": "ACICLOVIR", "forma": "Comprimido", "dosis": "400 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antiprotozoarios", "nombre": "METRONIDAZOL", "forma": "Comprimido vaginal", "dosis": "500 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Arsenal exclusivo CGR Juan Fernández"}, {"cat": "Antiparkinsonianos", "nombre": "LEVODOPA + BENSERAZIDA", "forma": "Comprimido", "dosis": "200+50 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Parkinson"}, {"cat": "Antiparkinsonianos", "nombre": "LEVODOPA + CARBIDOPA", "forma": "Cápsula", "dosis": "250+25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Parkinson"}, {"cat": "Antiparkinsonianos", "nombre": "PRAMIPEXOLE", "forma": "Comprimido", "dosis": "0,25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Parkinson"}, {"cat": "Antiparkinsonianos", "nombre": "PRAMIPEXOLE", "forma": "Comprimido", "dosis": "1 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Parkinson"}, {"cat": "Antiparkinsonianos", "nombre": "QUETIAPINA", "forma": "Comprimido", "dosis": "25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Parkinson"}, {"cat": "Antiparkinsonianos", "nombre": "TRIHEXIFENIDILO (Clorhidrato)", "forma": "Comprimido", "dosis": "2 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Parkinson"}, {"cat": "Antianémicos", "nombre": "FERROSO FUMARATO", "forma": "Comprimido", "dosis": "330 mg (109 mg Fe activo)", "prof": "MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Matrona prescribe sólo en embarazo normal"}, {"cat": "Antianémicos", "nombre": "FERROSO SULFATO", "forma": "Solución Oral gotas", "dosis": "125 mg/mL (25 mg hierro)", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antianémicos", "nombre": "ÁCIDO FÓLICO", "forma": "Comprimido", "dosis": "1 mg", "prof": "MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Matrona prescribe sólo en embarazo normal. Solo 2024."}, {"cat": "Antianémicos", "nombre": "ÁCIDO FÓLICO", "forma": "Comprimido", "dosis": "5 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antianémicos", "nombre": "ÁCIDO FÓLICO", "forma": "Comprimido", "dosis": "0,4 mg", "prof": "MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Matrona prescribe sólo en embarazo normal"}, {"cat": "Anticoagulantes", "nombre": "FITOMENADIONA", "forma": "Solución Inyectable", "dosis": "10 mg/mL", "prof": "MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 1, "obs": "*Uso exclusivo comunas: Algarrobo, El Tabo, El Quisco, San Antonio, Santo Domingo, Cartagena, Navidad e Isla Juan Fernández"}, {"cat": "Anticoagulantes", "nombre": "ÁCIDO TRANEXÁMICO", "forma": "Solución Inyectable", "dosis": "1000 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Usar según protocolo"}, {"cat": "Antianginosos", "nombre": "ATENOLOL", "forma": "Comprimido", "dosis": "50 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antianginosos", "nombre": "ISOSORBIDA Dinitrato", "forma": "Comprimido", "dosis": "10 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antianginosos", "nombre": "NITROGLICERINA", "forma": "Solución Inyectable", "dosis": "50 mg/10mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antianginosos", "nombre": "PROPRANOLOL (Clorhidrato)", "forma": "Comprimido", "dosis": "10 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antianginosos", "nombre": "PROPRANOLOL (Clorhidrato)", "forma": "Comprimido", "dosis": "40 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antiarrítmicos", "nombre": "ADENOSINA", "forma": "Solución Inyectable", "dosis": "6 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Según protocolo Taquicardia Paroxística Supraventricular"}, {"cat": "Antiarrítmicos", "nombre": "AMIODARONA (Clorhidrato)", "forma": "Comprimido", "dosis": "200 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antiarrítmicos", "nombre": "AMIODARONA (Clorhidrato)", "forma": "Solución Inyectable", "dosis": "50 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antiarrítmicos", "nombre": "DIGOXINA", "forma": "Comprimido", "dosis": "0,25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Con contrarreferencia cardiología o medicina interna"}, {"cat": "Antiarrítmicos", "nombre": "LANATOSIDO C", "forma": "Solución Inyectable", "dosis": "0,4 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Antihipertensivos", "nombre": "AMLODIPINO", "forma": "Comprimido", "dosis": "5 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Dosis recomendada 2,5–10 mg una vez/día"}, {"cat": "Antihipertensivos", "nombre": "AMLODIPINO", "forma": "Comprimido", "dosis": "10 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Dosis máxima 10 mg una vez al día"}, {"cat": "Antihipertensivos", "nombre": "CAPTOPRIL", "forma": "Comprimido", "dosis": "25 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Usar en Emergencia Hipertensiva por Vía Oral"}, {"cat": "Antihipertensivos", "nombre": "CARVEDILOL", "forma": "Comprimido", "dosis": "6,25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antihipertensivos", "nombre": "CARVEDILOL", "forma": "Comprimido", "dosis": "25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antihipertensivos", "nombre": "ENALAPRIL (Maleato)", "forma": "Comprimido", "dosis": "10 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antihipertensivos", "nombre": "ENALAPRIL (Maleato)", "forma": "Comprimido", "dosis": "20 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antihipertensivos", "nombre": "HIDROCLOROTIAZIDA", "forma": "Comprimido", "dosis": "50 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antihipertensivos", "nombre": "LABETALOL", "forma": "Solución Inyectable", "dosis": "100 mg/20mL", "prof": "MG", "aps": 0, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "*Uso exclusivo comunas: Algarrobo, El Tabo, El Quisco, San Antonio, Santo Domingo, Cartagena, Navidad e Isla Juan Fernández — HTA en embarazadas"}, {"cat": "Antihipertensivos", "nombre": "LOSARTÁN (Potásico)", "forma": "Comprimido", "dosis": "50 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Antihipertensivos", "nombre": "LOSARTÁN / HIDROCLOROTIAZIDA", "forma": "Comprimido", "dosis": "100+25 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Solo en paciente con multimorbilidad, polifarmacia y poca adherencia"}, {"cat": "Antihipertensivos", "nombre": "METILDOPA", "forma": "Comprimido", "dosis": "250 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo para embarazadas y pacientes nefrópatas"}, {"cat": "Antihipertensivos", "nombre": "NITRENDIPINO", "forma": "Comprimido", "dosis": "20 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Alternativa: Amlodipino"}, {"cat": "Hipolipidemiantes", "nombre": "ATORVASTATINA", "forma": "Comprimido", "dosis": "20 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Hipolipidemiantes", "nombre": "CIPROFIBRATO", "forma": "Comprimido", "dosis": "100 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Tratamiento 2ª línea para hiperlipidemia mixta"}, {"cat": "Hipolipidemiantes", "nombre": "GEMFIBROZILO", "forma": "Comprimido", "dosis": "600 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Hipolipidemiantes", "nombre": "ROSUVASTATINA", "forma": "Comprimido", "dosis": "20 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo en intolerancia a Atorvastatina documentada en ISP"}, {"cat": "Antitrombóticos / IAM", "nombre": "CLOPIDOGREL", "forma": "Comprimido Recubierto", "dosis": "75 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "GES IAM. Exclusivo uso Carro Reanimación CP"}, {"cat": "Dermatología", "nombre": "ADAPALENO", "forma": "Gel", "dosis": "0,1%", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo Teledermatología"}, {"cat": "Dermatología", "nombre": "BACITRACINA + NEOMICINA", "forma": "Ungüento Dérmico", "dosis": "500 UI + 5 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Dermatología", "nombre": "CICLOPIROXOLAMINA", "forma": "Crema Dérmica", "dosis": "1%", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Dermatología", "nombre": "CLOBETAZOL (propionato)", "forma": "Ungüento/Crema Dérmica", "dosis": "0,05%", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Con diagnóstico de Teledermatología"}, {"cat": "Dermatología", "nombre": "DELTAMETRINA + PIPERONIL", "forma": "Loción", "dosis": "Combinado", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Solo para Escabiosis"}, {"cat": "Dermatología", "nombre": "DELTAMETRINA + PIPERONIL", "forma": "Shampoo", "dosis": "Combinado", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Solo para Pediculosis"}, {"cat": "Dermatología", "nombre": "HIDROCORTISONA (Acetato)", "forma": "Crema Dérmica", "dosis": "1%", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Con diagnóstico de Teledermatología"}, {"cat": "Dermatología", "nombre": "PERMETRINA", "forma": "Crema Tópica (Preparado Magistral)", "dosis": "5%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Usar en niños > 2 años y adultos"}, {"cat": "Dermatología", "nombre": "PERMETRINA", "forma": "Crema Lavable", "dosis": "1%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Usar preferentemente en niños"}, {"cat": "Desinfectantes y Antisépticos", "nombre": "ALCOHOL GEL", "forma": "Gel Uso Tópico", "dosis": "70°", "prof": "—", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Desinfectantes y Antisépticos", "nombre": "CLORHEXIDINA GLUCONATO", "forma": "Solución (Colutorio)", "dosis": "0,12%", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo uso odontológico"}, {"cat": "Desinfectantes y Antisépticos", "nombre": "CLORHEXIDINA GLUCONATO", "forma": "Solución Uso Tópico", "dosis": "2%", "prof": "—", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Desinfectantes y Antisépticos", "nombre": "CLORHEXIDINA GLUCONATO", "forma": "Jabón", "dosis": "2%", "prof": "—", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Desinfectantes y Antisépticos", "nombre": "FLUORURO DE SODIO", "forma": "Solución (Colutorio)", "dosis": "0,05%", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo uso odontológico"}, {"cat": "Desinfectantes y Antisépticos", "nombre": "FLUORURO DE SODIO", "forma": "Pasta Dental", "dosis": "5000 ppm", "prof": "CD", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo uso odontológico"}, {"cat": "Diuréticos", "nombre": "ESPIRONOLACTONA", "forma": "Comprimido", "dosis": "25 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Diuréticos", "nombre": "FUROSEMIDA", "forma": "Comprimido", "dosis": "40 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Diuréticos", "nombre": "FUROSEMIDA", "forma": "Solución Inyectable", "dosis": "20 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Diuréticos", "nombre": "HIDROCLOROTIAZIDA", "forma": "Comprimido", "dosis": "50 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "ATROPINA Sulfato", "forma": "Solución Inyectable", "dosis": "1 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Antiespasmódico"}, {"cat": "Aparato Digestivo", "nombre": "CLORPROMAZINA (Clorhidrato)", "forma": "Comprimido", "dosis": "25 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Antiemético"}, {"cat": "Aparato Digestivo", "nombre": "CLORPROMAZINA (Clorhidrato)", "forma": "Solución Inyectable", "dosis": "25 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Antiemético"}, {"cat": "Aparato Digestivo", "nombre": "DIFENIDOL (Clorhidrato)", "forma": "Comprimido", "dosis": "25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPORRINO"}, {"cat": "Aparato Digestivo", "nombre": "DOMPERIDONA", "forma": "Comprimido", "dosis": "10 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Restringida para mayores de 12 años"}, {"cat": "Aparato Digestivo", "nombre": "ENEMA ADULTO FOSFATO DE SODIO", "forma": "Solución rectal", "dosis": "—", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Cuidados Paliativos Universales"}, {"cat": "Aparato Digestivo", "nombre": "ESCOPOLAMINA Butilbromuro", "forma": "Solución Inyectable", "dosis": "20 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Antiespasmódico"}, {"cat": "Aparato Digestivo", "nombre": "LACTULOSA", "forma": "Solución Oral", "dosis": "65%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Laxante osmótico"}, {"cat": "Aparato Digestivo", "nombre": "LOPERAMIDA", "forma": "Comprimido", "dosis": "2 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "METOCLOPRAMIDA (Clorhidrato)", "forma": "Solución Inyectable", "dosis": "10 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "OMEPRAZOL", "forma": "Cápsula", "dosis": "20 mg", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "ONDANSETRÓN", "forma": "Solución Inyectable", "dosis": "8 mg/4mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "*En CESFAM/CECOSF para Cuidados Paliativos Universales"}, {"cat": "Aparato Digestivo", "nombre": "PARGEVERINA (Clorhidrato)", "forma": "Solución Inyectable", "dosis": "5 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Antiespasmódico"}, {"cat": "Aparato Digestivo", "nombre": "PARGEVERINA (Clorhidrato)", "forma": "Solución para gotas orales", "dosis": "5 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Antiespasmódico"}, {"cat": "Aparato Digestivo", "nombre": "POLIETILENGLICOL", "forma": "Polvo para solución oral", "dosis": "17 g", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Laxante osmótico"}, {"cat": "Aparato Digestivo", "nombre": "PROPIFENASONA/ADIFENINA", "forma": "Supositorio", "dosis": "440/50 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "PROPIFENASONA/ADIFENINA", "forma": "Supositorio", "dosis": "220/25 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "RANITIDINA", "forma": "Comprimido", "dosis": "300 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "RANITIDINA", "forma": "Solución Inyectable", "dosis": "50 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "SALES REHIDRATANTES", "forma": "Solución oral", "dosis": "60 mEq Na/litro", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "SALES REHIDRATANTES", "forma": "Solución oral", "dosis": "90 mEq Na/litro", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aparato Digestivo", "nombre": "VASELINA LÍQUIDA", "forma": "Aceite mineral", "dosis": "—", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Laxante"}, {"cat": "Glucocorticoides sistémicos", "nombre": "BETAMETASONA (Fosfato Disódico)", "forma": "Solución Inyectable", "dosis": "4 mg/1mL", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Glucocorticoides sistémicos", "nombre": "CLOBETAZOL (propionato)", "forma": "Crema", "dosis": "0,05%", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Alternativa: Clobetazol Ungüento Dérmico 0,05%"}, {"cat": "Glucocorticoides sistémicos", "nombre": "HIDROCORTISONA (Acetato)", "forma": "Ungüento Dérmico", "dosis": "1%", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Anticonceptivos", "nombre": "ETINILESTRADIOL + LEVONORGESTREL", "forma": "Comprimido recubierto", "dosis": "0,03+0,15 mg", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer"}, {"cat": "Anticonceptivos", "nombre": "ETONOGESTREL", "forma": "Implante Subcutáneo", "dosis": "68 mg", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer. Matrona capacitada"}, {"cat": "Anticonceptivos", "nombre": "ETONOGESTREL + ETINILESTRADIOL", "forma": "Anillo vaginal anticonceptivo", "dosis": "11,7+2,7 mg", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer"}, {"cat": "Anticonceptivos", "nombre": "LEVONORGESTREL", "forma": "Comprimido recubierto", "dosis": "0,03 mg", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer. Alternativa: Linestrenol CM 0,5 mg"}, {"cat": "Anticonceptivos", "nombre": "LEVONORGESTREL", "forma": "Comprimido", "dosis": "0,75 mg", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "PM Mujer (anticoncepción de emergencia)"}, {"cat": "Anticonceptivos", "nombre": "LEVONORGESTREL", "forma": "Implante Subdérmico", "dosis": "2 x 75 mg", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer"}, {"cat": "Anticonceptivos", "nombre": "LEVONORGESTREL", "forma": "Sistema Intrauterino", "dosis": "20 mcg/24h", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer"}, {"cat": "Anticonceptivos", "nombre": "MEDROXIPROGESTERONA (Acetato)", "forma": "Suspensión Inyectable", "dosis": "150 mg/mL", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer"}, {"cat": "Anticonceptivos", "nombre": "MEDROXIPROGESTERONA (Acetato)", "forma": "Suspensión Inyectable S.C.", "dosis": "104 mg/0,65mL", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer"}, {"cat": "Anticonceptivos", "nombre": "NORETISTERONA + ESTRADIOL", "forma": "Solución Inyectable", "dosis": "50+5 mg", "prof": "ME/MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer"}, {"cat": "Anticonceptivos", "nombre": "PRESERVATIVO", "forma": "Resistente", "dosis": "L:16cm, Diam:4,4-5,6cm", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer"}, {"cat": "TRH / Estrógenos", "nombre": "ESTRADIOL", "forma": "Gel Uso Tópico (Transdérmico)", "dosis": "0,5 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer. MG capacitado por MINSAL"}, {"cat": "TRH / Estrógenos", "nombre": "ESTRADIOL + DIDROGESTERONA", "forma": "Comprimido recubierto", "dosis": "1+5 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer. MG capacitado por MINSAL"}, {"cat": "TRH / Estrógenos", "nombre": "ESTRADIOL Micronizado", "forma": "Comprimido recubierto", "dosis": "1 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer. MG capacitado por MINSAL"}, {"cat": "TRH / Estrógenos", "nombre": "PROGESTERONA (Micronizada)", "forma": "Comprimido recubierto", "dosis": "100 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer. MG capacitado por MINSAL"}, {"cat": "TRH / Estrógenos", "nombre": "PROGESTERONA (Micronizada)", "forma": "Comprimido recubierto", "dosis": "200 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer. MG capacitado por MINSAL"}, {"cat": "TRH / Estrógenos", "nombre": "TIBOLONA", "forma": "Comprimido recubierto", "dosis": "2,5 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Mujer. MG capacitado por MINSAL"}, {"cat": "Oxitócicos", "nombre": "OXITOCINA", "forma": "Solución Inyectable", "dosis": "10 UI/mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "Con Protocolo de Uso"}, {"cat": "Diabetes Mellitus", "nombre": "EMPAGLIFLOZINA", "forma": "Comprimido Recubierto", "dosis": "10 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Usar según protocolo"}, {"cat": "Diabetes Mellitus", "nombre": "EMPAGLIFLOZINA", "forma": "Comprimido Recubierto", "dosis": "25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Usar según protocolo"}, {"cat": "Diabetes Mellitus", "nombre": "GLIBENCLAMIDA", "forma": "Comprimido", "dosis": "5 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Restringir al máximo posible su uso"}, {"cat": "Diabetes Mellitus", "nombre": "GLUCAGÓN", "forma": "Polvo para Solución Inyectable", "dosis": "1 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Usar según protocolo urgencia DM"}, {"cat": "Diabetes Mellitus", "nombre": "INSULINA HUMANA CRISTALINA", "forma": "Solución Inyectable", "dosis": "100 UI/mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "PM Cardiovascular"}, {"cat": "Diabetes Mellitus", "nombre": "INSULINA HUMANA ISOFANA (NPH)", "forma": "Solución Inyectable", "dosis": "100 UI/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Cardiovascular"}, {"cat": "Diabetes Mellitus", "nombre": "METFORMINA (Clorhidrato)", "forma": "Comprimido Recubierto", "dosis": "850 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Diabetes Mellitus", "nombre": "METFORMINA (Clorhidrato)", "forma": "Comprimido Recubierto", "dosis": "500 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Diabetes Mellitus", "nombre": "METFORMINA (Clorhidrato)", "forma": "Comprimido Lib. Prolongada", "dosis": "1 g", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Diabetes Mellitus", "nombre": "VILDAGLIPTINA", "forma": "Comprimido", "dosis": "50 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES"}, {"cat": "Tiroides", "nombre": "LEVOTIROXINA SÓDICA", "forma": "Comprimido", "dosis": "100 mcg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Hipotiroidismo"}, {"cat": "Tiroides", "nombre": "LEVOTIROXINA SÓDICA", "forma": "Comprimido", "dosis": "50 mcg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM Hipotiroidismo"}, {"cat": "Oftalmología", "nombre": "ACETAZOLAMIDA", "forma": "Comprimido", "dosis": "250 mg", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "ACICLOVIR", "forma": "Ungüento Oftálmico", "dosis": "3%", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "BIMATOPROST", "forma": "Solución Oftálmica", "dosis": "0,03%", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO. Alternativa Travoprost 0,004%"}, {"cat": "Oftalmología", "nombre": "BIMATOPROST + BRIMONIDINA + TIMOLOL", "forma": "Solución Oftálmica", "dosis": "0,1%+1,5%+6,83%", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "BRIMONIDINA", "forma": "Solución Oftálmica", "dosis": "0,2%", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO. Medicamento 2ª línea"}, {"cat": "Oftalmología", "nombre": "CICLOPENTOLATO (Clorhidrato)", "forma": "Solución Oftálmica", "dosis": "1%", "prof": "ME/TMO", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "DICLOFENACO", "forma": "Solución Oftálmica", "dosis": "0,1%", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO. Alternativa Ketorolaco Soln Oft 0,4%"}, {"cat": "Oftalmología", "nombre": "DORZOLAMIDA", "forma": "Solución Oftálmica", "dosis": "20 mg", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO. Usar en alérgico a Timolol"}, {"cat": "Oftalmología", "nombre": "DORZOLAMIDA + TIMOLOL", "forma": "Solución Oftálmica", "dosis": "20+5 mg", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "FENILEFRINA", "forma": "Solución Oftálmica", "dosis": "2,5%", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "GENTAMICINA Sulfato", "forma": "Solución Oftálmica", "dosis": "0,3%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Oftalmología", "nombre": "GENTAMICINA Sulfato", "forma": "Ungüento Oftálmico", "dosis": "0,3%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Oftalmología", "nombre": "PILOCARPINA", "forma": "Solución Oftálmica", "dosis": "2%", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "PREDNISOLONA (Acetato)", "forma": "Suspensión Oftálmica", "dosis": "1%", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "PROPARACAÍNA", "forma": "Solución Oftálmica", "dosis": "0,5%", "prof": "ME/TMO", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Exclusivo procedimientos UAPO. Alternativa Tetracaína"}, {"cat": "Oftalmología", "nombre": "TIMOLOL (Maleato)", "forma": "Solución Oftálmica", "dosis": "0,5%", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "TOBRAMICINA + DEXAMETASONA", "forma": "Solución Oftálmica", "dosis": "(0,3+0,1) mg/mL", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "TOBRAMICINA + DEXAMETASONA", "forma": "Ungüento Oftálmico", "dosis": "0,3+0,1 mg", "prof": "ME", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPO"}, {"cat": "Oftalmología", "nombre": "TROPICAMIDA", "forma": "Solución Oftálmica", "dosis": "1%", "prof": "ME/TMO", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Exclusivo UAPO"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "ARIPIPRAZOL", "forma": "Comprimido", "dosis": "10 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES Depresión desde APS / Psiquiatra APS / Consultoría / Contrarreferencia"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "CLORPROMAZINA (Clorhidrato)", "forma": "Comprimido", "dosis": "100 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Según protocolo GES Depresión / Salud Mental Urgencia / Continuidad tratamiento"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "CLORPROMAZINA (Clorhidrato)", "forma": "Solución Inyectable", "dosis": "25 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "HALOPERIDOL", "forma": "Solución Inyectable", "dosis": "5 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Usar según protocolo Salud Mental de Urgencia (SMU)"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "HALOPERIDOL", "forma": "Comprimido", "dosis": "1 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Continuidad tratamiento contrareferido / Cuidados Paliativos Universales"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "HALOPERIDOL", "forma": "Comprimido", "dosis": "5 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Continuidad tratamiento contrareferido"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "MIRTAZAPINA", "forma": "Comprimido", "dosis": "15 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES Depresión desde APS / Psiquiatra APS / Consultoría / Contrarreferencia"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "QUETIAPINA (Fumarato)", "forma": "Comprimido", "dosis": "25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Continuidad tratamiento / GES Alzheimer / Cuidados Paliativos Universales"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "QUETIAPINA (Fumarato)", "forma": "Comprimido", "dosis": "100 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Continuidad tratamiento / Consultoría con especialistas en APS"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "RISPERIDONA", "forma": "Comprimido", "dosis": "1 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Continuidad tratamiento / GES Alzheimer / Cuidados Paliativos Universales"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "RISPERIDONA", "forma": "Comprimido", "dosis": "3 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Continuidad tratamiento / GES Alzheimer"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "RISPERIDONA", "forma": "Gotas", "dosis": "1 mg/mL", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Continuidad tratamiento / Cuidados Paliativos Universales"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "TRAZODONA", "forma": "Comprimido", "dosis": "25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES Alzheimer. Contrarreferencia / Consultoría psiquiátrica"}, {"cat": "Psicofármacos - Antipsicóticos", "nombre": "TRAZODONA", "forma": "Comprimido", "dosis": "100 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES Alzheimer. Contrarreferencia / Consultoría psiquiátrica"}, {"cat": "Psicofármacos - Antidepresivos", "nombre": "AMITRIPTILINA (Clorhidrato)", "forma": "Comprimido", "dosis": "25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Psicofármacos - Antidepresivos", "nombre": "CITALOPRAM", "forma": "Comprimido", "dosis": "20 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES Alzheimer"}, {"cat": "Psicofármacos - Antidepresivos", "nombre": "DULOXETINA", "forma": "Cápsula", "dosis": "30 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Cuidados Paliativos Universales"}, {"cat": "Psicofármacos - Antidepresivos", "nombre": "ESCITALOPRAM", "forma": "Comprimido", "dosis": "10 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Continuidad tratamiento / Mayores de 65 años inscritos PM Salud Mental"}, {"cat": "Psicofármacos - Antidepresivos", "nombre": "FLUOXETINA", "forma": "Comprimido", "dosis": "20 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Psicofármacos - Antidepresivos", "nombre": "IMIPRAMINA (Clorhidrato)", "forma": "Comprimido", "dosis": "25 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Psicofármacos - Antidepresivos", "nombre": "PAROXETINA", "forma": "Comprimido", "dosis": "20 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Psicofármacos - Antidepresivos", "nombre": "SERTRALINA", "forma": "Comprimido", "dosis": "50 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES Depresión. GES Enfermedad Alzheimer"}, {"cat": "Psicofármacos - Antidepresivos", "nombre": "VENLAFAXINA", "forma": "Comprimido", "dosis": "75 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Alternativa: Venlafaxina 75 mg Liberación Prolongada"}, {"cat": "Psicofármacos - Ansiolíticos / Sueño", "nombre": "ALPRAZOLAM (b)", "forma": "Comprimido", "dosis": "0,50 mg", "prof": "MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Usar por períodos breves"}, {"cat": "Psicofármacos - Ansiolíticos / Sueño", "nombre": "CLONAZEPAM (b)", "forma": "Comprimido", "dosis": "0,50 mg", "prof": "MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Psicofármacos - Ansiolíticos / Sueño", "nombre": "CLONAZEPAM (b)", "forma": "Comprimido", "dosis": "2 mg", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Solo p/paciente contrareferido p/continuidad tratamiento"}, {"cat": "Psicofármacos - Ansiolíticos / Sueño", "nombre": "DIAZEPAM (b)", "forma": "Comprimido", "dosis": "10 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 0, "obs": ""}, {"cat": "Psicofármacos - Ansiolíticos / Sueño", "nombre": "ESZOPICLONA", "forma": "Comprimido", "dosis": "3 mg", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "GES Depresión / Contrarreferencia especialista / Psiquiatra APS"}, {"cat": "Psicofármacos - Ansiolíticos / Sueño", "nombre": "MELATONINA", "forma": "Comprimido", "dosis": "3 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Psicofármacos - Ansiolíticos / Sueño", "nombre": "ZOPICLONA", "forma": "Comprimido", "dosis": "7,5 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Psicofármacos - Déficit Atencional", "nombre": "METILFENIDATO (Clorhidrato) (b)", "forma": "Comprimido", "dosis": "10 mg", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Contrarreferencia psiquiatra o neurólogo"}, {"cat": "Psicofármacos - Déficit Atencional", "nombre": "METILFENIDATO (Clorhidrato) (b)", "forma": "Comprimido Lib. Prolongada", "dosis": "20 mg", "prof": "ME/MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Contrarreferencia psiquiatra o neurólogo. Mayores de 6 años"}, {"cat": "Psicofármacos - Otros", "nombre": "DIAZEPAM (b)", "forma": "Solución Inyectable", "dosis": "10 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 0, "obs": ""}, {"cat": "Psicofármacos - Otros", "nombre": "DISULFIRAM", "forma": "Comprimido", "dosis": "500 mg", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Tratamiento alcoholismo"}, {"cat": "Psicofármacos - Otros", "nombre": "LORAZEPAM (b)", "forma": "Solución Inyectable", "dosis": "4 mg/2mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 0, "obs": "Usar según protocolo Salud Mental de Urgencia"}, {"cat": "Aparato Respiratorio", "nombre": "AMINOFILINA", "forma": "Solución Inyectable", "dosis": "250 mg/10mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aparato Respiratorio", "nombre": "BUDESONIDA", "forma": "Aerosol para Inhalación", "dosis": "200 mcg/dosis", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM IRA/ERA"}, {"cat": "Aparato Respiratorio", "nombre": "FLUTICASONA", "forma": "Inhalador presurizado", "dosis": "125 mcg/dosis", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM IRA. IRA Baja y Asma <15 años"}, {"cat": "Aparato Respiratorio", "nombre": "FLUTICASONA (Propionato)", "forma": "Spray Nasal", "dosis": "50 mcg/dosis", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Solo p/Asma <15 años contrareferido p/continuidad tto"}, {"cat": "Aparato Respiratorio", "nombre": "FLUTICASONA / SALMETEROL", "forma": "Aerosol para Inhalación", "dosis": "125/25 mcg/dosis", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM IRA"}, {"cat": "Aparato Respiratorio", "nombre": "FLUTICASONA / SALMETEROL", "forma": "Aerosol para Inhalación", "dosis": "250/25 mcg/dosis", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "PM ERA"}, {"cat": "Aparato Respiratorio", "nombre": "IPRATROPIO Bromuro", "forma": "Suspensión para Inhalación", "dosis": "20 mcg/dosis", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "PM IRA/ERA"}, {"cat": "Aparato Respiratorio", "nombre": "IPRATROPIO+FENOTEROL", "forma": "Solución para nebulizar", "dosis": "Combinado", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Aparato Respiratorio", "nombre": "MOMETASONA Furoato", "forma": "Suspensión Nasal Spray", "dosis": "50 mcg/dosis", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo UAPORRINO"}, {"cat": "Aparato Respiratorio", "nombre": "OSELTAMIVIR", "forma": "Cápsula", "dosis": "75 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "Usar según Guía Clínica Influenza"}, {"cat": "Aparato Respiratorio", "nombre": "OSELTAMIVIR", "forma": "Polvo para suspensión oral", "dosis": "60 mg/5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "Usar según Guía Clínica Influenza"}, {"cat": "Aparato Respiratorio", "nombre": "RACEPINEFRINA (Clorhidrato)", "forma": "Solución para inhalación", "dosis": "11,25 mg/0,5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "Usar según Guía Clínica Influenza"}, {"cat": "Aparato Respiratorio", "nombre": "SALBUTAMOL (Sulfato)", "forma": "Suspensión para Inhalación", "dosis": "100 mcg/dosis", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "PM IRA/ERA"}, {"cat": "Aparato Respiratorio", "nombre": "SALMETEROL", "forma": "Suspensión para Inhalación", "dosis": "25 mcg/dosis", "prof": "ME/MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "PM IRA/ERA"}, {"cat": "Electrolitos y Soluciones", "nombre": "CALCIO (Gluconato)", "forma": "Solución Inyectable", "dosis": "10%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "GLUCOSA", "forma": "Solución Inyectable", "dosis": "5%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "GLUCOSA", "forma": "Solución Inyectable", "dosis": "10%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "GLUCOSA", "forma": "Solución Inyectable", "dosis": "30%", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "GLUCOSA + SODIO Cloruro", "forma": "Solución Isotónica Inyectable", "dosis": "Según fórmula", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "MAGNESIO (Sulfato)", "forma": "Solución Inyectable", "dosis": "25%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "POTASIO Cloruro", "forma": "Gragea", "dosis": "600 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "POTASIO Cloruro", "forma": "Solución Inyectable", "dosis": "10% — 10 mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "SODIO BICARBONATO", "forma": "Solución Inyectable", "dosis": "8,4%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "SODIO CLORURO", "forma": "Solución Inyectable", "dosis": "0,9%", "prof": "MG/CD", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Electrolitos y Soluciones", "nombre": "SODIO CLORURO", "forma": "Solución Nasal", "dosis": "0,9%", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Exclusivo para obstrucción nasal en niños < 2 años"}, {"cat": "Electrolitos y Soluciones", "nombre": "SOLUCIÓN RINGER LACTATO", "forma": "Solución Inyectable", "dosis": "Según fórmula", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Vitaminas y Nutrientes", "nombre": "CALCIO CARBONATO + Vitamina D", "forma": "Cápsula", "dosis": "800 mg (320 mg Ca elem.)", "prof": "MG/MAT", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Matrona prescribe sólo en embarazo normal"}, {"cat": "Vitaminas y Nutrientes", "nombre": "FITOMENADIONA", "forma": "Solución Inyectable", "dosis": "10 mg/mL", "prof": "MG", "aps": 1, "sapu": 0, "sar": 0, "sur": 0, "cecof": 1, "obs": "*Uso exclusivo comunas: Algarrobo, El Tabo, El Quisco, San Antonio, Santo Domingo, Cartagena, Navidad e Isla Juan Fernández"}, {"cat": "Vitaminas y Nutrientes", "nombre": "VITAMINAS A-C-D", "forma": "Solución Oral gotas", "dosis": "Según fórmula", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Vitaminas y Nutrientes", "nombre": "Vit B1+B6+B12", "forma": "Solución Inyectable", "dosis": "200+100+10.000 mcg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Vitaminas y Nutrientes", "nombre": "ZINC (Sulfato Heptahidratado)", "forma": "Solución Oral gotas", "dosis": "5 mg/mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Según Norma Técnica N°231 PM Infancia"}, {"cat": "Otros", "nombre": "AGUA BIDESTILADA", "forma": "Solución Inyectable", "dosis": "5 mL", "prof": "—", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": ""}, {"cat": "Otros", "nombre": "LANOLINA + ÓXIDO ZINC + VASELINA", "forma": "Pomada", "dosis": "Según fórmula", "prof": "MG", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "Otros", "nombre": "VASELINA SÓLIDA", "forma": "Ungüento", "dosis": "—", "prof": "—", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Producto Oficinal"}, {"cat": "Profilaxis", "nombre": "AZITROMICINA", "forma": "Suspensión Oral", "dosis": "200 mg/5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Exclusivo p/Profilaxis Coqueluche, distribuido por SEREMI según necesidad"}, {"cat": "Profilaxis", "nombre": "RIFAMPICINA", "forma": "Jarabe", "dosis": "100 mg/5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 1, "cecof": 1, "obs": "Exclusivo p/Profilaxis Meningitis, distribuido por SEREMI según necesidad"}, {"cat": "Antiinfecciosos - Cefalosporinas", "nombre": "CEFTRIAXONA", "forma": "Polvo para solución inyectable", "dosis": "1.000 mg", "prof": "ME/MG", "aps": 0, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Arsenal exclusivo CGR Juan Fernández"}, {"cat": "Cardiovascular - Antitrombóticos", "nombre": "ENOXAPARINA", "forma": "Solución inyectable", "dosis": "40 mg", "prof": "ME/MG", "aps": 0, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Arsenal exclusivo CGR Juan Fernández"}, {"cat": "Cardiovascular - Antitrombóticos", "nombre": "TENECTEPLASE", "forma": "Solución inyectable", "dosis": "10.000 U", "prof": "ME/MG", "aps": 0, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": "Arsenal exclusivo CGR Juan Fernández"}, {"cat": "Campaña de Invierno", "nombre": "RACEPINEFRINA (Clorhidrato)", "forma": "Solución para inhalación", "dosis": "11,25 mg/0,5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "Campaña de Invierno — Usar según Guía Clínica Influenza"}, {"cat": "Campaña de Invierno", "nombre": "OSELTAMIVIR", "forma": "Cápsula", "dosis": "75 mg", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "Campaña de Invierno — Usar según Guía Clínica Influenza"}, {"cat": "Campaña de Invierno", "nombre": "OSELTAMIVIR", "forma": "Polvo para suspensión oral", "dosis": "60 mg/5mL", "prof": "MG", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "Campaña de Invierno — Usar según Guía Clínica Influenza"}];
+const VACUNAS=[{"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Inmunoglobulina Humana", "forma": "Solución inyectable", "presentacion": "Vial monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Bloqueo epidemiológico — 300 UI/mL"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Inmunoglobulina Antirrábica", "forma": "Solución inyectable", "presentacion": "Jeringa prellenada o frasco ampolla monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Norma técnica vacunación antirrábica D.S. N°614/2014 — 150 UI/mL"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Inmunoglobulina Antitetánica", "forma": "Solución inyectable", "presentacion": "Jeringa precargada monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Norma técnica vacunación antirrábica D.S. N°614/2014 — 250 UI/mL"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Inmunoglobulina Antivaricela", "forma": "Solución inyectable", "presentacion": "Vial monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Bloqueo epidemiológico B27 N°04 del 26.05.2019"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Toxoide Diftérico Tetánico", "forma": "Suspensión inyectable", "presentacion": "Vial multidosis", "aps": 1, "sapu": 1, "sar": 1, "sur": 0, "cecof": 0, "obs": "Lineamientos técnicos operativos para vacunación antitetánica"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Antimeningocócica Nimenrix", "forma": "Suspensión inyectable con solvente", "presentacion": "Vial monodosis + diluyente", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Antimeningocócica Menquadfi", "forma": "Suspensión inyectable", "presentacion": "Jeringa prellenada monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Antimeningocócica Bexsero", "forma": "Suspensión inyectable", "presentacion": "Jeringa prellenada monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día, vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Antirrábica", "forma": "Liofilizado para solución inyectable con solvente", "presentacion": "Vial monodosis + diluyente", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Norma técnica vacunación antirrábica D.S. N°614/2014"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "DTPA (Difteria, Tétanos, Tos Ferina)", "forma": "Suspensión inyectable", "presentacion": "Jeringa prellenada o frasco ampolla monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día, vacunas especiales. Lineamientos vacunación antitetánica"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Hepatitis A Adulto", "forma": "Suspensión inyectable", "presentacion": "Vial monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Hepatitis A Pediátrica", "forma": "Suspensión inyectable", "presentacion": "Vial multidosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día, vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Hepatitis B Adulto", "forma": "Suspensión inyectable", "presentacion": "Vial multidosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día, vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Hepatitis B Pediátrica", "forma": "Suspensión inyectable", "presentacion": "Vial multidosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Hexavalente", "forma": "Suspensión inyectable", "presentacion": "Vial monodosis + diluyente", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día, vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Haemophilus influenzae tipo b (HIB)", "forma": "Suspensión inyectable", "presentacion": "Vial monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Influenza", "forma": "Suspensión inyectable", "presentacion": "Jeringa prellenada monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Campaña de vacunación. Vacunas especiales, puesta al día"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Neumocócica conjugada 13V", "forma": "Suspensión inyectable", "presentacion": "Jeringa prellenada monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día, vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Neumocócica conjugada 23V", "forma": "Suspensión inyectable", "presentacion": "Jeringa prellenada monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Poliomielitis inyectable", "forma": "Suspensión inyectable", "presentacion": "Vial monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Rotavirus", "forma": "Suspensión oral", "presentacion": "Vial monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Sarampión, Rubéola, Parotiditis (SRP) MMR II", "forma": "Liofilizado para solución inyectable", "presentacion": "Vial monodosis + diluyente", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Sarampión, Rubéola, Parotiditis (SRP) Monodosis", "forma": "", "presentacion": "", "aps": 0, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Sarampión, Rubéola, Parotiditis (SRP) Multidosis", "forma": "Liofilizado para solución inyectable", "presentacion": "Vial multidosis + diluyente", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Varicela", "forma": "Suspensión inyectable con solvente", "presentacion": "Vial monodosis + diluyente", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día, vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Virus Papiloma Humano (VPH) tetravalente", "forma": "", "presentacion": "", "aps": 0, "sapu": 0, "sar": 0, "sur": 0, "cecof": 0, "obs": ""}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Virus Papiloma Humano (VPH) nonavalente", "forma": "Suspensión inyectable", "presentacion": "Jeringa prellenada monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Vacunación programática, puesta al día, vacunas especiales"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Viruela del Mono (MPOX)", "forma": "Suspensión inyectable", "presentacion": "Jeringa prellenada monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Campaña de vacunación"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "COVID variante XBB.1.5 Spikevax", "forma": "Suspensión inyectable", "presentacion": "Vial monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Campaña de vacunación"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "COVID variante XBB.1.6 Comirnaty", "forma": "Suspensión inyectable", "presentacion": "Vial monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Campaña de vacunación"}, {"cat": "VACUNA / INMUNOGLOBULINA", "nombre": "Nirsevimab", "forma": "Suspensión inyectable", "presentacion": "Vial monodosis", "aps": 1, "sapu": 1, "sar": 0, "sur": 0, "cecof": 0, "obs": "Campaña de vacunación"}];
+
+
+// ══════════════════════════════
+//  ESTADO
+// ══════════════════════════════
+let TAB = 'farmacos';
+const CHIPS = new Set(['todos']);
+
+// ══════════════════════════════
+//  INICIALIZAR
+// ══════════════════════════════
+function inicializar() {
+  // Poblar selectores de categoría y forma
+  const cats  = [...new Set(FARMACOS.map(f=>f.cat))].sort();
+  const formas= [...new Set(FARMACOS.map(f=>f.forma))].sort();
+  const poblar = (id, arr) => {
+    const sel = document.getElementById(id);
+    arr.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
+  };
+  poblar('sel-cat', cats);
+  poblar('sel-forma', formas);
+  filtrar();
+}
+
+// ══════════════════════════════
+//  TABS
+// ══════════════════════════════
+function cambiarTab(tab) {
+  TAB = tab;
+  document.getElementById('tab-farm').className = tab==='farmacos' ? 'tab activo' : 'tab';
+  document.getElementById('tab-vac').className  = tab==='vacunas'  ? 'tab activo' : 'tab';
+  document.getElementById('filtros-farm').style.display = tab==='farmacos' ? '' : 'none';
+  document.getElementById('filtros-vac').style.display  = tab==='vacunas'  ? '' : 'none';
+  document.getElementById('busq').value = '';
+  CHIPS.clear(); CHIPS.add('todos');
+  actualizarChips();
+  filtrar();
+}
+
+// ══════════════════════════════
+//  CHIPS ESTABLECIMIENTO
+// ══════════════════════════════
+function toggleChip(id) {
+  CHIPS.delete('todos');
+  if (CHIPS.has(id)) {
+    CHIPS.delete(id);
+    if (CHIPS.size === 0) { CHIPS.add('todos'); }
+  } else {
+    CHIPS.add(id);
+  }
+  actualizarChips();
+  filtrar();
+}
+
+function toggleTodos() {
+  CHIPS.clear(); CHIPS.add('todos');
+  actualizarChips();
+  filtrar();
+}
+
+function actualizarChips() {
+  const est = ['aps','sapu','sar','sur','cecof'];
+  const prefix = TAB === 'farmacos' ? '' : 'vac-';
+  const todosId = TAB === 'farmacos' ? 'chip-todos' : 'chip-vac-todos';
+
+  est.forEach(id => {
+    const el = document.getElementById(`chip-${prefix}${id}`);
+    if (!el) return;
+    el.className = CHIPS.has(id) ? `chip activo-${id}` : 'chip';
+  });
+  const todosEl = document.getElementById(todosId);
+  if (todosEl) todosEl.className = CHIPS.has('todos') ? 'chip activo-todos' : 'chip';
+}
+
+// ══════════════════════════════
+//  FILTRAR
+// ══════════════════════════════
+function filtrar() {
+  const busq = document.getElementById('busq').value.toLowerCase();
+  const todos = CHIPS.has('todos');
+
+  if (TAB === 'farmacos') {
+    const cat   = document.getElementById('sel-cat').value;
+    const forma = document.getElementById('sel-forma').value;
+    const prof  = document.getElementById('sel-prof').value;
+    const restr = document.getElementById('sel-restriccion').value;
+
+    const resultado = FARMACOS.filter(f => {
+      // Establecimiento
+      if (!todos) {
+        const ok = [...CHIPS].some(c => f[c] === 1);
+        if (!ok) return false;
+      }
+      if (cat   && f.cat   !== cat)   return false;
+      if (forma && f.forma !== forma) return false;
+      if (prof  && !f.prof.includes(prof)) return false;
+
+      // Restricción
+      if (restr === 'si' && !f.prof.includes('ME')) return false;
+      if (restr === 'no' &&  f.prof.includes('ME')) return false;
+
+      if (busq) {
+        const hay = (f.nombre+f.forma+f.dosis+f.obs+f.cat).toLowerCase();
+        if (!hay.includes(busq)) return false;
+      }
+      return true;
+    });
+
+    document.getElementById('cnt').textContent = resultado.length;
+    document.getElementById('cnt-label').textContent = 'fármacos';
+    renderizarFarmacos(resultado);
+
+  } else {
+    const tipo = document.getElementById('sel-vac-tipo').value;
+
+    const resultado = VACUNAS.filter(v => {
+      if (!todos) {
+        const ok = [...CHIPS].some(c => v[c] === 1);
+        if (!ok) return false;
+      }
+      if (tipo && v.cat !== tipo) return false;
+      if (busq) {
+        const hay = (v.nombre+v.forma+(v.presentacion||'')+v.obs).toLowerCase();
+        if (!hay.includes(busq)) return false;
+      }
+      return true;
+    });
+
+    document.getElementById('cnt').textContent = resultado.length;
+    document.getElementById('cnt-label').textContent = 'vacunas';
+    renderizarVacunas(resultado);
+  }
+}
+
+// ══════════════════════════════
+//  RENDER FÁRMACOS
+// ══════════════════════════════
+function esRestringido(prof) {
+  return prof.includes('ME');
+}
+
+function badgeProf(prof) {
+  if (esRestringido(prof)) {
+    return `<span class="badge-prof restringido">⚠️ ${prof}</span>`;
+  }
+  return `<span class="badge-prof libre">${prof}</span>`;
+}
+
+function renderizarFarmacos(lista) {
+  const cont = document.getElementById('lista');
+  if (!lista.length) {
+    cont.innerHTML = `<div class="empty"><div class="icon">🔍</div><p>No se encontraron fármacos con los filtros aplicados.</p></div>`;
+    return;
+  }
+
+  const grupos = {};
+  lista.forEach(f => {
+    if (!grupos[f.cat]) grupos[f.cat] = [];
+    grupos[f.cat].push(f);
+  });
+
+  let html = '';
+  Object.keys(grupos).forEach(cat => {
+    html += `<div class="seccion-titulo">${cat}</div>`;
+    grupos[cat].forEach(f => {
+      const esInv = f.cat === 'Campaña de Invierno';
+      const af = [];
+      if (f.aps)   af.push('<span class="badge-af af-aps">APS</span>');
+      if (f.sapu)  af.push('<span class="badge-af af-sapu">SAPU</span>');
+      if (f.sar)   af.push('<span class="badge-af af-sar">SAR</span>');
+      if (f.sur)   af.push('<span class="badge-af af-sur">SUR</span>');
+      if (f.cecof) af.push('<span class="badge-af af-cecof">CECOF</span>');
+
+      const esJF = f.obs === 'Arsenal exclusivo CGR Juan Fernández';
+      const obsClass = esJF ? 'farm-obs jf' : 'farm-obs';
+
+      html += `
+        <div class="card-farm${esInv?' invierno':''}">
+          <div class="farm-top">
+            <div class="farm-nombre-box">
+              <div class="farm-nombre">${f.nombre}</div>
+            </div>
+            <div class="farm-forma-box">
+              <div class="farm-forma">${f.forma}</div>
+            </div>
+            <div class="farm-dosis">${f.dosis}</div>
+          </div>
+          <div class="farm-meta">
+            ${badgeProf(f.prof)}
+            ${af.join('')}
+          </div>
+          ${f.obs ? `<div class="${obsClass}">${esJF ? '📍 ' : f.cat==='Campaña de Invierno' ? '❄️ ' : 'ℹ️ '}${f.obs}</div>` : ''}
+        </div>`;
+    });
+  });
+  cont.innerHTML = html;
+}
+
+// ══════════════════════════════
+//  RENDER VACUNAS
+// ══════════════════════════════
+function renderizarVacunas(lista) {
+  const cont = document.getElementById('lista');
+  if (!lista.length) {
+    cont.innerHTML = `<div class="empty"><div class="icon">💉</div><p>No se encontraron vacunas con los filtros aplicados.</p></div>`;
+    return;
+  }
+
+  const grupos = {};
+  lista.forEach(v => {
+    const grp = v.cat === 'Campaña de Invierno' ? '❄️ Campaña de Invierno' : '💉 Vacunas e Inmunoglobulinas';
+    if (!grupos[grp]) grupos[grp] = [];
+    grupos[grp].push(v);
+  });
+
+  let html = '';
+  Object.keys(grupos).forEach(grp => {
+    html += `<div class="seccion-titulo">${grp}</div>`;
+    grupos[grp].forEach(v => {
+      const esInv = v.cat === 'Campaña de Invierno';
+      const af = [];
+      if (v.aps)   af.push('<span class="badge-af af-aps">APS</span>');
+      if (v.sapu)  af.push('<span class="badge-af af-sapu">SAPU</span>');
+      if (v.sar)   af.push('<span class="badge-af af-sar">SAR</span>');
+      if (v.sur)   af.push('<span class="badge-af af-sur">SUR</span>');
+      if (v.cecof) af.push('<span class="badge-af af-cecof">CECOF</span>');
+
+      const dosis = v.dosis || '';
+      const pres  = v.presentacion || '';
+
+      html += `
+        <div class="card-vac${esInv?' invierno':''}">
+          <div class="farm-top">
+            <div class="farm-nombre-box" style="grid-column:1/2">
+              <div class="farm-nombre">${v.nombre}</div>
+            </div>
+            <div class="farm-forma-box" style="grid-column:2/3">
+              <div class="farm-forma">${v.forma}${pres ? ' · '+pres : ''}</div>
+            </div>
+            ${dosis ? `<div class="farm-dosis" style="grid-column:3/4">${dosis}</div>` : ''}
+          </div>
+          <div class="vac-badges">${af.join('')}</div>
+          ${v.obs ? `<div class="farm-obs" style="margin-top:8px">ℹ️ ${v.obs}</div>` : ''}
+        </div>`;
+    });
+  });
+  cont.innerHTML = html;
+}
+
+// ══════════════════════════════
+//  LIMPIAR
+// ══════════════════════════════
+function limpiar() {
+  document.getElementById('busq').value = '';
+  ['sel-cat','sel-forma','sel-prof','sel-restriccion','sel-vac-tipo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  CHIPS.clear(); CHIPS.add('todos');
+  actualizarChips();
+  filtrar();
+  showToast('✅ Filtros limpiados');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+inicializar();
+</script>
+</body>
+</html>
