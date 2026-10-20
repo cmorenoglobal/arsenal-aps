@@ -29,7 +29,7 @@ Revisión del sitio **Arsenal Farmacológico APS · SSVSA** (`index.html`, `sw.j
 **M1. No había una forma rápida de saber si el contenido cambió ni de qué versión oficial viene.**
 - *Situación:* el sitio dice "2024–2025", pero no dice qué resolución o acta del Comité de Farmacia y Terapéutica respalda los datos ni la fecha de la última actualización.
 - *Riesgo:* si alguien copia la página (es pública y fácil de clonar) y la modifica, los usuarios no tienen cómo distinguir la oficial. Lo mismo si tú la actualizas: no queda claro qué versión se está viendo.
-- *Arreglo aplicado (parcial):* se agregó un pie de página con la fuente (Comité de Farmacia y Terapéutica SSVSA, arsenal 2024–2025) y la fecha de última actualización (13-05-2026, la fecha de la planilla). **Pendiente:** agregar el N° de resolución o acta que respalda el arsenal (no aparece en la planilla) y un aviso del tipo "Información de apoyo; ante dudas consultar con Farmacia del establecimiento". La fecha se cambia a mano en `index.html` (está marcada con un comentario) cada vez que se actualice el arsenal.
+- *Arreglo aplicado (parcial):* se agregó un pie de página con la fuente (Comité de Farmacia y Terapéutica SSVSA, arsenal 2024–2025) y la fecha de última actualización. La fecha se toma automáticamente del Excel (la fecha en que se guardó por última vez). **Pendiente:** agregar el N° de resolución o acta que respalda el arsenal (no aparece en la planilla) y un aviso del tipo "Información de apoyo; ante dudas consultar con Farmacia del establecimiento".
 
 **M2. Los datos estaban expuestos a inyección de código si se editan a futuro (corregido).**
 - *Situación:* la página armaba las tarjetas pegando el texto de cada fármaco directamente como HTML (`innerHTML`). Hoy los datos son tuyos y fijos, así que no era explotable desde afuera, pero si un día se cargan desde la planilla o alguien edita un texto con `<` o un trozo de código, ese código se ejecutaría en el navegador de cada funcionario.
@@ -88,13 +88,14 @@ Probado en Chromium a 1200 px y 360 px de ancho: sin errores en consola, filtros
 - AC2. Los emojis (💊, ⚠️, 🏥) los leen los lectores de pantalla ("píldora", "advertencia"); no es grave, pero se pueden marcar con `aria-hidden="true"`.
 
 **Rendimiento**
-- R1. La página pesa ~100 KB y carga rápido; no hay problema real. Si el arsenal crece mucho, conviene pasar los datos a un archivo `datos.json` aparte.
+- R1. La página pesa ~30 KB más el Excel (~37 KB) y carga rápido; no hay problema real.
 
 **Estructura y mantenimiento de los datos** (lo más importante a mediano plazo)
-- E1. **Hay dos copias de los datos**: la planilla Excel y el JSON dentro de `index.html`. Si se actualiza una y no la otra, quedan distintas sin que nadie lo note. Sugiero que la planilla sea la fuente oficial y generar el JSON desde ella con un pequeño script (o una GitHub Action) cada vez que cambie, en lugar de editar el HTML a mano.
-- E2. Separar el código en `index.html` (estructura), `app.js` (lógica) y `datos.json` (arsenal). Facilita revisar cambios: un PR que modifica `datos.json` muestra exactamente qué fármaco cambió.
-- E3. Agregar al repo una descripción y un `README.md` breve: qué es, quién lo mantiene, de dónde salen los datos y cómo actualizarlos.
+- E1. ✅ **Resuelto: los datos salen solo del Excel.** Antes había dos copias (la planilla y un JSON dentro de `index.html`) que podían quedar distintas. Ahora la página lee `Arsenal_Farmacologico_APS_SSVSA.xlsx` directamente al abrirse, sin librerías externas. Para actualizar el arsenal basta con reemplazar el Excel (instrucciones en `README.md`). Al unificar se comprobó que ambas copias eran idénticas salvo 3 observaciones de Campaña de Invierno, donde el HTML anteponía "Campaña de Invierno — "; ahora se muestra el texto tal como está en el Excel.
+- E2. Separar el código en `index.html` (estructura) y `app.js` (lógica) para que sea más fácil de revisar.
+- E3. ✅ Agregado `README.md` con qué es el sitio y cómo actualizar los datos. Falta agregar una descripción corta al repo en GitHub (*About → ⚙️*).
 - E4. Las rutas del service worker están fijas a `/arsenal-aps/`. Si algún día el sitio se mueve a un dominio propio, hay que ajustarlas.
+- E5. En la pestaña Vacunas, la opción de filtro "Campaña de Invierno" nunca muestra resultados, porque en el Excel todas las vacunas tienen categoría "VACUNA / INMUNOGLOBULINA" (los fármacos de Campaña de Invierno están en la pestaña Fármacos). Conviene decidir si se quita la opción o si alguna vacuna debería llevar esa categoría.
 
 **Errores visibles**
 - Íconos inexistentes del manifest (corregido) y desborde horizontal en celular (corregido). No encontré otros errores en consola.

@@ -1,5 +1,5 @@
-const CACHE = 'af-aps-v5';
-const FILES = ['/arsenal-aps/index.html', '/arsenal-aps/manifest.json', '/arsenal-aps/icon.svg'];
+const CACHE = 'af-aps-v6';
+const FILES = ['/arsenal-aps/index.html', '/arsenal-aps/manifest.json', '/arsenal-aps/icon.svg', '/arsenal-aps/Arsenal_Farmacologico_APS_SSVSA.xlsx'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
