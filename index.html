@@ -111,6 +111,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
 .empty .icon{font-size:48px;margin-bottom:12px;}
 
 /* TOAST */
+.pie{text-align:center;padding:18px 16px 28px;font-size:11px;line-height:1.6;color:var(--texto-sec);border-top:1px solid var(--borde);margin-top:8px;}
+.pie strong{color:var(--texto);}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1e293b;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;transition:transform .3s;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.3);}
 .toast.show{transform:translateX(-50%) translateY(0);}
 
@@ -219,6 +221,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
 </div>
 
 <div class="main" id="lista"></div>
+<footer class="pie">
+  <!-- Actualizar estos datos cada vez que cambie el arsenal -->
+  <div><strong>Fuente:</strong> Comité de Farmacia y Terapéutica · Servicio de Salud Valparaíso – San Antonio · Arsenal 2024–2025</div>
+  <div><strong>Última actualización:</strong> <time datetime="2026-05-13">13-05-2026</time></div>
+</footer>
 <div class="toast" id="toast"></div>
 
 <script>

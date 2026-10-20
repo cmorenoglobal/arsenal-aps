@@ -26,10 +26,10 @@ Revisión del sitio **Arsenal Farmacológico APS · SSVSA** (`index.html`, `sw.j
 
 ### Medio
 
-**M1. No hay una forma rápida de saber si el contenido cambió ni de qué versión oficial viene.**
+**M1. No había una forma rápida de saber si el contenido cambió ni de qué versión oficial viene.**
 - *Situación:* el sitio dice "2024–2025", pero no dice qué resolución o acta del Comité de Farmacia y Terapéutica respalda los datos ni la fecha de la última actualización.
 - *Riesgo:* si alguien copia la página (es pública y fácil de clonar) y la modifica, los usuarios no tienen cómo distinguir la oficial. Lo mismo si tú la actualizas: no queda claro qué versión se está viendo.
-- *Cómo arreglarlo:* agregar un pie de página con "Fuente: Resolución/Acta N° … del CFT, fecha …" y "Última actualización: dd-mm-aaaa", y un aviso del tipo "Información de apoyo; ante dudas consultar con Farmacia del establecimiento". Lo dejo como recomendación porque el texto debe definirlo el Servicio.
+- *Arreglo aplicado (parcial):* se agregó un pie de página con la fuente (Comité de Farmacia y Terapéutica SSVSA, arsenal 2024–2025) y la fecha de última actualización (13-05-2026, la fecha de la planilla). **Pendiente:** agregar el N° de resolución o acta que respalda el arsenal (no aparece en la planilla) y un aviso del tipo "Información de apoyo; ante dudas consultar con Farmacia del establecimiento". La fecha se cambia a mano en `index.html` (está marcada con un comentario) cada vez que se actualice el arsenal.
 
 **M2. Los datos estaban expuestos a inyección de código si se editan a futuro (corregido).**
 - *Situación:* la página armaba las tarjetas pegando el texto de cada fármaco directamente como HTML (`innerHTML`). Hoy los datos son tuyos y fijos, así que no era explotable desde afuera, pero si un día se cargan desde la planilla o alguien edita un texto con `<` o un trozo de código, ese código se ejecutaría en el navegador de cada funcionario.
@@ -72,6 +72,7 @@ Revisión del sitio **Arsenal Farmacológico APS · SSVSA** (`index.html`, `sw.j
 | Ícono de la app y ajustes al service worker | El `manifest.json` apuntaba a `icon-192.png` e `icon-512.png`, que **no existen** en el repo (error 404 y la app instalada queda sin ícono). Agregué `icon.svg`. |
 | Celular: eliminar el desborde horizontal | En un teléfono de 360 px la página medía 527 px de ancho y había que desplazarse de lado. Ahora calza exacto. |
 | Búsqueda sin distinguir tildes | Antes "lidocaina" (sin tilde) no encontraba "LIDOCAÍNA". Ahora la búsqueda ignora tildes, mayúsculas y la ñ ("ninos" encuentra "niños"), y los espacios sobrantes al inicio o al final. |
+| Pie con fuente y fecha de actualización | Ver M1. |
 
 Probado en Chromium a 1200 px y 360 px de ancho: sin errores en consola, filtros, buscador y pestañas funcionando (328 fármacos, 31 vacunas, igual que antes).
 
