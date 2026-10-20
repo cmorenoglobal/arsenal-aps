@@ -307,8 +307,13 @@ function actualizarChips() {
 // ══════════════════════════════
 //  FILTRAR
 // ══════════════════════════════
+// Minúsculas y sin tildes, para que "lidocaina" encuentre "LIDOCAÍNA"
+function normalizar(s) {
+  return String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 function filtrar() {
-  const busq = document.getElementById('busq').value.toLowerCase();
+  const busq = normalizar(document.getElementById('busq').value.trim());
   const todos = CHIPS.has('todos');
 
   if (TAB === 'farmacos') {
@@ -332,7 +337,7 @@ function filtrar() {
       if (restr === 'no' &&  f.prof.includes('ME')) return false;
 
       if (busq) {
-        const hay = (f.nombre+f.forma+f.dosis+f.obs+f.cat).toLowerCase();
+        const hay = normalizar([f.nombre,f.forma,f.dosis,f.obs,f.cat].join(' '));
         if (!hay.includes(busq)) return false;
       }
       return true;
@@ -352,7 +357,7 @@ function filtrar() {
       }
       if (tipo && v.cat !== tipo) return false;
       if (busq) {
-        const hay = (v.nombre+v.forma+(v.presentacion||'')+v.obs).toLowerCase();
+        const hay = normalizar([v.nombre,v.forma,v.presentacion||'',v.obs].join(' '));
         if (!hay.includes(busq)) return false;
       }
       return true;

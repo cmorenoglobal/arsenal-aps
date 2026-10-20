@@ -71,6 +71,7 @@ Revisión del sitio **Arsenal Farmacológico APS · SSVSA** (`index.html`, `sw.j
 | Celular: dosis con salto de línea y sin zoom en iPhone | En iPhone, tocar un campo con letra menor a 16 px hace zoom automático y descuadra la pantalla. |
 | Ícono de la app y ajustes al service worker | El `manifest.json` apuntaba a `icon-192.png` e `icon-512.png`, que **no existen** en el repo (error 404 y la app instalada queda sin ícono). Agregué `icon.svg`. |
 | Celular: eliminar el desborde horizontal | En un teléfono de 360 px la página medía 527 px de ancho y había que desplazarse de lado. Ahora calza exacto. |
+| Búsqueda sin distinguir tildes | Antes "lidocaina" (sin tilde) no encontraba "LIDOCAÍNA". Ahora la búsqueda ignora tildes, mayúsculas y la ñ ("ninos" encuentra "niños"), y los espacios sobrantes al inicio o al final. |
 
 Probado en Chromium a 1200 px y 360 px de ancho: sin errores en consola, filtros, buscador y pestañas funcionando (328 fármacos, 31 vacunas, igual que antes).
 
@@ -80,7 +81,6 @@ Probado en Chromium a 1200 px y 360 px de ancho: sin errores en consola, filtros
 - U1. En el teléfono los filtros ocupan casi toda la primera pantalla y los fármacos empiezan abajo. Sugiero dejar visible solo el buscador y esconder el resto detrás de un botón "Filtros ▾".
 - U2. El contador de resultados está bien, pero no indica qué filtros están activos. Un texto corto ("SAPU · Antibióticos") ayuda a no confundirse.
 - U3. Guardar el último filtro usado (por ejemplo, el tipo de establecimiento) para que quien trabaja en un SAPU no tenga que marcarlo cada vez.
-- U4. La búsqueda distingue tildes: "lidocaina" sin tilde no encuentra "LIDOCAÍNA". Se arregla normalizando el texto (`normalize('NFD')`) al comparar. Es un cambio pequeño y lo recomiendo como siguiente paso.
 
 **Accesibilidad**
 - AC1. Revisar contraste del texto gris claro (`--texto-sec: #64748b` sobre gris `#f1f5f9`): está en el límite.
