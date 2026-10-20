@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#1a3a5c">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>Arsenal Farmacológico APS · SSVSA</title>
 <style>
 :root{
@@ -31,7 +34,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
 
 /* TABS */
 .tabs{display:flex;background:white;border-bottom:2px solid var(--borde);}
-.tab{flex:1;padding:11px 8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--texto-sec);text-align:center;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab{flex:1;padding:11px 8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--texto-sec);text-align:center;background:none;border:none;font-family:inherit;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
 .tab.activo{color:var(--azul-med);border-bottom-color:var(--azul-med);}
 .tab:hover:not(.activo){background:var(--gris);}
 
@@ -47,9 +50,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
 .filtros-grid select:focus{border-color:var(--azul-med);}
 
 /* CHIPS ESTABLECIMIENTO */
+.tab:focus-visible,.chip:focus-visible,.btn-limpiar:focus-visible{outline:3px solid var(--azul-med);outline-offset:2px;}
 .chips-label{font-size:11px;font-weight:700;color:var(--texto-sec);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
 .chips{display:flex;gap:6px;flex-wrap:wrap;}
-.chip{padding:5px 13px;border-radius:20px;border:2px solid var(--borde);background:white;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--texto-sec);}
+.chip{padding:5px 13px;border-radius:20px;border:2px solid var(--borde);background:white;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;color:var(--texto-sec);}
 .chip:hover{border-color:var(--azul-med);color:var(--azul-med);}
 .chip.activo-todos {background:var(--texto);   border-color:var(--texto);   color:white;}
 .chip.activo-aps   {background:var(--azul);    border-color:var(--azul);    color:white;}
@@ -107,6 +111,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
 .empty .icon{font-size:48px;margin-bottom:12px;}
 
 /* TOAST */
+.pie{text-align:center;padding:18px 16px 28px;font-size:11px;line-height:1.6;color:var(--texto-sec);border-top:1px solid var(--borde);margin-top:8px;}
+.pie strong{color:var(--texto);}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1e293b;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;transition:transform .3s;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.3);}
 .toast.show{transform:translateX(-50%) translateY(0);}
 
@@ -114,12 +120,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
   .header-text h1{font-size:13px;}
   .filtros-grid{grid-template-columns:1fr 1fr;}
   .main{padding:10px 8px;}
-  .farm-top{grid-template-columns:1fr 1fr auto !important;}
+  .farm-top{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto !important;}
+  .filtros-grid select{min-width:0;width:100%;}
+  .farm-nombre,.farm-forma,.farm-dosis{overflow-wrap:anywhere;}
+  .farm-dosis{max-width:110px;}
   .farm-nombre-box{padding:8px 10px;}
   .farm-forma-box{padding:8px 10px;}
   .farm-nombre{font-size:12px;}
   .farm-forma{font-size:11px;}
-  .farm-dosis{font-size:11px;padding:8px 10px;}
+  .farm-dosis{font-size:11px;padding:8px 10px;white-space:normal;}
+  .busqueda input,.filtros-grid select{font-size:16px;} /* evita el zoom automático de iPhone al tocar el campo */
   .badge-af{font-size:10px;padding:2px 6px;}
   .badge-prof{font-size:10px;padding:2px 7px;}
   .farm-obs{font-size:11px;}
@@ -136,49 +146,49 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
     <p>Servicio de Salud Valparaíso – San Antonio · 2024–2025</p>
   </div>
   <div class="header-count">
-    <span id="cnt">—</span>
+    <span id="cnt" aria-live="polite">—</span>
     <small id="cnt-label">resultados</small>
   </div>
 </div>
 
 <div class="tabs">
-  <div class="tab activo" id="tab-farm" onclick="cambiarTab('farmacos')">💊 Fármacos</div>
-  <div class="tab"        id="tab-vac"  onclick="cambiarTab('vacunas')">💉 Vacunas</div>
+  <button type="button" class="tab activo" id="tab-farm" aria-pressed="true"  onclick="cambiarTab('farmacos')">💊 Fármacos</button>
+  <button type="button" class="tab"        id="tab-vac"  aria-pressed="false" onclick="cambiarTab('vacunas')">💉 Vacunas</button>
 </div>
 
 <div class="filtros-wrap">
   <div class="busqueda">
-    <input id="busq" type="search" placeholder="🔍  Buscar nombre, forma, observación…" oninput="filtrar()">
+    <input id="busq" type="search" aria-label="Buscar por nombre, forma u observación" placeholder="🔍  Buscar nombre, forma, observación…" oninput="filtrar()">
   </div>
 
 
   <!-- Filtros fármacos -->
   <div id="filtros-farm">
     <div class="filtros-grid">
-      <select id="sel-cat"         onchange="filtrar()"><option value="">Todas las categorías</option></select>
-      <select id="sel-forma"       onchange="filtrar()"><option value="">Todas las formas farmacéuticas</option></select>
-      <select id="sel-prof"        onchange="filtrar()">
+      <select id="sel-cat"         aria-label="Categoría" onchange="filtrar()"><option value="">Todas las categorías</option></select>
+      <select id="sel-forma"       aria-label="Forma farmacéutica" onchange="filtrar()"><option value="">Todas las formas farmacéuticas</option></select>
+      <select id="sel-prof"        aria-label="Profesional que prescribe" onchange="filtrar()">
         <option value="">Todos los profesionales</option>
         <option value="MG">Médico General (MG)</option>
         <option value="ME">Médico Especialista (ME)</option>
         <option value="CD">Cirujano Dentista (CD)</option>
         <option value="MAT">Matrona (MAT)</option>
       </select>
-      <select id="sel-restriccion" onchange="filtrar()">
+      <select id="sel-restriccion" aria-label="Restricción de especialista" onchange="filtrar()">
         <option value="">Con y sin restricción</option>
         <option value="si">Solo con restricción (ME)</option>
         <option value="no">Sin restricción de especialista</option>
       </select>
-      <button class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
+      <button type="button" class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
     </div>
-    <div class="chips-label">Filtrar por establecimiento:</div>
-    <div class="chips" id="chips-farm">
-      <span class="chip activo-todos" id="chip-todos" onclick="toggleTodos()">Todos</span>
-      <span class="chip" id="chip-aps"   onclick="toggleChip('aps')"  >🏥 APS</span>
-      <span class="chip" id="chip-sapu"  onclick="toggleChip('sapu')" >🚑 SAPU</span>
-      <span class="chip" id="chip-sar"   onclick="toggleChip('sar')"  >🏨 SAR</span>
-      <span class="chip" id="chip-sur"   onclick="toggleChip('sur')"  >🏩 SUR</span>
-      <span class="chip" id="chip-cecof" onclick="toggleChip('cecof')">🏘️ CECOF</span>
+    <div class="chips-label" id="lbl-chips-farm">Filtrar por establecimiento:</div>
+    <div class="chips" id="chips-farm" role="group" aria-labelledby="lbl-chips-farm">
+      <button type="button" class="chip activo-todos" id="chip-todos" aria-pressed="true" onclick="toggleTodos()">Todos</button>
+      <button type="button" class="chip" id="chip-aps"   aria-pressed="false" onclick="toggleChip('aps')"  >🏥 APS</button>
+      <button type="button" class="chip" id="chip-sapu"  aria-pressed="false" onclick="toggleChip('sapu')" >🚑 SAPU</button>
+      <button type="button" class="chip" id="chip-sar"   aria-pressed="false" onclick="toggleChip('sar')"  >🏨 SAR</button>
+      <button type="button" class="chip" id="chip-sur"   aria-pressed="false" onclick="toggleChip('sur')"  >🏩 SUR</button>
+      <button type="button" class="chip" id="chip-cecof" aria-pressed="false" onclick="toggleChip('cecof')">🏘️ CECOF</button>
     </div>
     <div class="leyenda">
       <strong>Profesional:</strong>
@@ -191,26 +201,31 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
   <!-- Filtros vacunas -->
   <div id="filtros-vac" style="display:none">
     <div class="filtros-grid">
-      <select id="sel-vac-tipo" onchange="filtrar()">
+      <select id="sel-vac-tipo" aria-label="Tipo de vacuna" onchange="filtrar()">
         <option value="">Todos los tipos</option>
         <option value="Campaña de Invierno">Campaña de Invierno</option>
         <option value="VACUNA / INMUNOGLOBULINA">Vacunas e Inmunoglobulinas</option>
       </select>
-      <button class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
+      <button type="button" class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
     </div>
-    <div class="chips-label">Filtrar por establecimiento:</div>
-    <div class="chips" id="chips-vac">
-      <span class="chip activo-todos" id="chip-vac-todos" onclick="toggleTodos()">Todos</span>
-      <span class="chip" id="chip-vac-aps"   onclick="toggleChip('aps')"  >🏥 APS</span>
-      <span class="chip" id="chip-vac-sapu"  onclick="toggleChip('sapu')" >🚑 SAPU</span>
-      <span class="chip" id="chip-vac-sar"   onclick="toggleChip('sar')"  >🏨 SAR</span>
-      <span class="chip" id="chip-vac-sur"   onclick="toggleChip('sur')"  >🏩 SUR</span>
-      <span class="chip" id="chip-vac-cecof" onclick="toggleChip('cecof')">🏘️ CECOF</span>
+    <div class="chips-label" id="lbl-chips-vac">Filtrar por establecimiento:</div>
+    <div class="chips" id="chips-vac" role="group" aria-labelledby="lbl-chips-vac">
+      <button type="button" class="chip activo-todos" id="chip-vac-todos" aria-pressed="true" onclick="toggleTodos()">Todos</button>
+      <button type="button" class="chip" id="chip-vac-aps"   aria-pressed="false" onclick="toggleChip('aps')"  >🏥 APS</button>
+      <button type="button" class="chip" id="chip-vac-sapu"  aria-pressed="false" onclick="toggleChip('sapu')" >🚑 SAPU</button>
+      <button type="button" class="chip" id="chip-vac-sar"   aria-pressed="false" onclick="toggleChip('sar')"  >🏨 SAR</button>
+      <button type="button" class="chip" id="chip-vac-sur"   aria-pressed="false" onclick="toggleChip('sur')"  >🏩 SUR</button>
+      <button type="button" class="chip" id="chip-vac-cecof" aria-pressed="false" onclick="toggleChip('cecof')">🏘️ CECOF</button>
     </div>
   </div>
 </div>
 
 <div class="main" id="lista"></div>
+<footer class="pie">
+  <!-- Actualizar estos datos cada vez que cambie el arsenal -->
+  <div><strong>Fuente:</strong> Comité de Farmacia y Terapéutica · Servicio de Salud Valparaíso – San Antonio · Arsenal 2024–2025</div>
+  <div><strong>Última actualización:</strong> <time datetime="2026-05-13">13-05-2026</time></div>
+</footer>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -247,6 +262,8 @@ function cambiarTab(tab) {
   TAB = tab;
   document.getElementById('tab-farm').className = tab==='farmacos' ? 'tab activo' : 'tab';
   document.getElementById('tab-vac').className  = tab==='vacunas'  ? 'tab activo' : 'tab';
+  document.getElementById('tab-farm').setAttribute('aria-pressed', tab==='farmacos');
+  document.getElementById('tab-vac').setAttribute('aria-pressed', tab==='vacunas');
   document.getElementById('filtros-farm').style.display = tab==='farmacos' ? '' : 'none';
   document.getElementById('filtros-vac').style.display  = tab==='vacunas'  ? '' : 'none';
   document.getElementById('busq').value = '';
@@ -285,16 +302,25 @@ function actualizarChips() {
     const el = document.getElementById(`chip-${prefix}${id}`);
     if (!el) return;
     el.className = CHIPS.has(id) ? `chip activo-${id}` : 'chip';
+    el.setAttribute('aria-pressed', CHIPS.has(id));
   });
   const todosEl = document.getElementById(todosId);
-  if (todosEl) todosEl.className = CHIPS.has('todos') ? 'chip activo-todos' : 'chip';
+  if (todosEl) {
+    todosEl.className = CHIPS.has('todos') ? 'chip activo-todos' : 'chip';
+    todosEl.setAttribute('aria-pressed', CHIPS.has('todos'));
+  }
 }
 
 // ══════════════════════════════
 //  FILTRAR
 // ══════════════════════════════
+// Minúsculas y sin tildes, para que "lidocaina" encuentre "LIDOCAÍNA"
+function normalizar(s) {
+  return String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 function filtrar() {
-  const busq = document.getElementById('busq').value.toLowerCase();
+  const busq = normalizar(document.getElementById('busq').value.trim());
   const todos = CHIPS.has('todos');
 
   if (TAB === 'farmacos') {
@@ -318,7 +344,7 @@ function filtrar() {
       if (restr === 'no' &&  f.prof.includes('ME')) return false;
 
       if (busq) {
-        const hay = (f.nombre+f.forma+f.dosis+f.obs+f.cat).toLowerCase();
+        const hay = normalizar([f.nombre,f.forma,f.dosis,f.obs,f.cat].join(' '));
         if (!hay.includes(busq)) return false;
       }
       return true;
@@ -338,7 +364,7 @@ function filtrar() {
       }
       if (tipo && v.cat !== tipo) return false;
       if (busq) {
-        const hay = (v.nombre+v.forma+(v.presentacion||'')+v.obs).toLowerCase();
+        const hay = normalizar([v.nombre,v.forma,v.presentacion||'',v.obs].join(' '));
         if (!hay.includes(busq)) return false;
       }
       return true;
@@ -353,15 +379,20 @@ function filtrar() {
 // ══════════════════════════════
 //  RENDER FÁRMACOS
 // ══════════════════════════════
+// Escapa texto antes de insertarlo como HTML (evita que un dato con < o & rompa la página o inyecte código)
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function esRestringido(prof) {
   return prof.includes('ME');
 }
 
 function badgeProf(prof) {
   if (esRestringido(prof)) {
-    return `<span class="badge-prof restringido">⚠️ ${prof}</span>`;
+    return `<span class="badge-prof restringido">⚠️ ${esc(prof)}</span>`;
   }
-  return `<span class="badge-prof libre">${prof}</span>`;
+  return `<span class="badge-prof libre">${esc(prof)}</span>`;
 }
 
 function renderizarFarmacos(lista) {
@@ -379,7 +410,7 @@ function renderizarFarmacos(lista) {
 
   let html = '';
   Object.keys(grupos).forEach(cat => {
-    html += `<div class="seccion-titulo">${cat}</div>`;
+    html += `<div class="seccion-titulo">${esc(cat)}</div>`;
     grupos[cat].forEach(f => {
       const esInv = f.cat === 'Campaña de Invierno';
       const af = [];
@@ -396,18 +427,18 @@ function renderizarFarmacos(lista) {
         <div class="card-farm${esInv?' invierno':''}">
           <div class="farm-top">
             <div class="farm-nombre-box">
-              <div class="farm-nombre">${f.nombre}</div>
+              <div class="farm-nombre">${esc(f.nombre)}</div>
             </div>
             <div class="farm-forma-box">
-              <div class="farm-forma">${f.forma}</div>
+              <div class="farm-forma">${esc(f.forma)}</div>
             </div>
-            <div class="farm-dosis">${f.dosis}</div>
+            <div class="farm-dosis">${esc(f.dosis)}</div>
           </div>
           <div class="farm-meta">
             ${badgeProf(f.prof)}
             ${af.join('')}
           </div>
-          ${f.obs ? `<div class="${obsClass}">${esJF ? '📍 ' : f.cat==='Campaña de Invierno' ? '❄️ ' : 'ℹ️ '}${f.obs}</div>` : ''}
+          ${f.obs ? `<div class="${obsClass}">${esJF ? '📍 ' : f.cat==='Campaña de Invierno' ? '❄️ ' : 'ℹ️ '}${esc(f.obs)}</div>` : ''}
         </div>`;
     });
   });
@@ -433,7 +464,7 @@ function renderizarVacunas(lista) {
 
   let html = '';
   Object.keys(grupos).forEach(grp => {
-    html += `<div class="seccion-titulo">${grp}</div>`;
+    html += `<div class="seccion-titulo">${esc(grp)}</div>`;
     grupos[grp].forEach(v => {
       const esInv = v.cat === 'Campaña de Invierno';
       const af = [];
@@ -450,15 +481,15 @@ function renderizarVacunas(lista) {
         <div class="card-vac${esInv?' invierno':''}">
           <div class="farm-top">
             <div class="farm-nombre-box" style="grid-column:1/2">
-              <div class="farm-nombre">${v.nombre}</div>
+              <div class="farm-nombre">${esc(v.nombre)}</div>
             </div>
             <div class="farm-forma-box" style="grid-column:2/3">
-              <div class="farm-forma">${v.forma}${pres ? ' · '+pres : ''}</div>
+              <div class="farm-forma">${esc(v.forma)}${pres ? ' · '+esc(pres) : ''}</div>
             </div>
-            ${dosis ? `<div class="farm-dosis" style="grid-column:3/4">${dosis}</div>` : ''}
+            ${dosis ? `<div class="farm-dosis" style="grid-column:3/4">${esc(dosis)}</div>` : ''}
           </div>
           <div class="vac-badges">${af.join('')}</div>
-          ${v.obs ? `<div class="farm-obs" style="margin-top:8px">ℹ️ ${v.obs}</div>` : ''}
+          ${v.obs ? `<div class="farm-obs" style="margin-top:8px">ℹ️ ${esc(v.obs)}</div>` : ''}
         </div>`;
     });
   });
