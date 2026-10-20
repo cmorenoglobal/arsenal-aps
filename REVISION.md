@@ -87,7 +87,7 @@ Probado en Chromium a 1200 px y 360 px de ancho: sin errores en consola, filtros
 - AC2. Los emojis (💊, ⚠️, 🏥) los leen los lectores de pantalla ("píldora", "advertencia"); no es grave, pero se pueden marcar con `aria-hidden="true"`.
 
 **Rendimiento**
-- R1. La página pesa ~150 KB y carga rápido; no hay problema real. Si el arsenal crece mucho, conviene pasar los datos a un archivo `datos.json` aparte.
+- R1. La página pesa ~100 KB y carga rápido; no hay problema real. Si el arsenal crece mucho, conviene pasar los datos a un archivo `datos.json` aparte.
 
 **Estructura y mantenimiento de los datos** (lo más importante a mediano plazo)
 - E1. **Hay dos copias de los datos**: la planilla Excel y el JSON dentro de `index.html`. Si se actualiza una y no la otra, quedan distintas sin que nadie lo note. Sugiero que la planilla sea la fuente oficial y generar el JSON desde ella con un pequeño script (o una GitHub Action) cada vez que cambie, en lugar de editar el HTML a mano.
