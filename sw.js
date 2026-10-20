@@ -1,8 +1,8 @@
-const CACHE = 'af-aps-v4';
-const FILES = ['/arsenal-aps/', '/arsenal-aps/index.html', '/arsenal-aps/manifest.json'];
+const CACHE = 'af-aps-v5';
+const FILES = ['/arsenal-aps/index.html', '/arsenal-aps/manifest.json', '/arsenal-aps/icon.svg'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/arsenal-aps/index.html','/arsenal-aps/manifest.json'])));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
   self.skipWaiting();
 });
 
@@ -14,9 +14,11 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Solo se cachean peticiones GET del propio sitio (no de otros dominios)
+  if (e.request.method !== 'GET' || new URL(e.request.url).origin !== self.location.origin) return;
   e.respondWith(
     fetch(e.request).then(resp => {
-      if (resp && resp.status === 200 && e.request.method === 'GET') {
+      if (resp && resp.status === 200) {
         const clone = resp.clone();
         caches.open(CACHE).then(c => c.put(e.request, clone));
       }
