@@ -353,15 +353,20 @@ function filtrar() {
 // ══════════════════════════════
 //  RENDER FÁRMACOS
 // ══════════════════════════════
+// Escapa texto antes de insertarlo como HTML (evita que un dato con < o & rompa la página o inyecte código)
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function esRestringido(prof) {
   return prof.includes('ME');
 }
 
 function badgeProf(prof) {
   if (esRestringido(prof)) {
-    return `<span class="badge-prof restringido">⚠️ ${prof}</span>`;
+    return `<span class="badge-prof restringido">⚠️ ${esc(prof)}</span>`;
   }
-  return `<span class="badge-prof libre">${prof}</span>`;
+  return `<span class="badge-prof libre">${esc(prof)}</span>`;
 }
 
 function renderizarFarmacos(lista) {
@@ -379,7 +384,7 @@ function renderizarFarmacos(lista) {
 
   let html = '';
   Object.keys(grupos).forEach(cat => {
-    html += `<div class="seccion-titulo">${cat}</div>`;
+    html += `<div class="seccion-titulo">${esc(cat)}</div>`;
     grupos[cat].forEach(f => {
       const esInv = f.cat === 'Campaña de Invierno';
       const af = [];
@@ -396,18 +401,18 @@ function renderizarFarmacos(lista) {
         <div class="card-farm${esInv?' invierno':''}">
           <div class="farm-top">
             <div class="farm-nombre-box">
-              <div class="farm-nombre">${f.nombre}</div>
+              <div class="farm-nombre">${esc(f.nombre)}</div>
             </div>
             <div class="farm-forma-box">
-              <div class="farm-forma">${f.forma}</div>
+              <div class="farm-forma">${esc(f.forma)}</div>
             </div>
-            <div class="farm-dosis">${f.dosis}</div>
+            <div class="farm-dosis">${esc(f.dosis)}</div>
           </div>
           <div class="farm-meta">
             ${badgeProf(f.prof)}
             ${af.join('')}
           </div>
-          ${f.obs ? `<div class="${obsClass}">${esJF ? '📍 ' : f.cat==='Campaña de Invierno' ? '❄️ ' : 'ℹ️ '}${f.obs}</div>` : ''}
+          ${f.obs ? `<div class="${obsClass}">${esJF ? '📍 ' : f.cat==='Campaña de Invierno' ? '❄️ ' : 'ℹ️ '}${esc(f.obs)}</div>` : ''}
         </div>`;
     });
   });
@@ -433,7 +438,7 @@ function renderizarVacunas(lista) {
 
   let html = '';
   Object.keys(grupos).forEach(grp => {
-    html += `<div class="seccion-titulo">${grp}</div>`;
+    html += `<div class="seccion-titulo">${esc(grp)}</div>`;
     grupos[grp].forEach(v => {
       const esInv = v.cat === 'Campaña de Invierno';
       const af = [];
@@ -450,15 +455,15 @@ function renderizarVacunas(lista) {
         <div class="card-vac${esInv?' invierno':''}">
           <div class="farm-top">
             <div class="farm-nombre-box" style="grid-column:1/2">
-              <div class="farm-nombre">${v.nombre}</div>
+              <div class="farm-nombre">${esc(v.nombre)}</div>
             </div>
             <div class="farm-forma-box" style="grid-column:2/3">
-              <div class="farm-forma">${v.forma}${pres ? ' · '+pres : ''}</div>
+              <div class="farm-forma">${esc(v.forma)}${pres ? ' · '+esc(pres) : ''}</div>
             </div>
-            ${dosis ? `<div class="farm-dosis" style="grid-column:3/4">${dosis}</div>` : ''}
+            ${dosis ? `<div class="farm-dosis" style="grid-column:3/4">${esc(dosis)}</div>` : ''}
           </div>
           <div class="vac-badges">${af.join('')}</div>
-          ${v.obs ? `<div class="farm-obs" style="margin-top:8px">ℹ️ ${v.obs}</div>` : ''}
+          ${v.obs ? `<div class="farm-obs" style="margin-top:8px">ℹ️ ${esc(v.obs)}</div>` : ''}
         </div>`;
     });
   });
