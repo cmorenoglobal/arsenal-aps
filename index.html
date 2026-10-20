@@ -33,7 +33,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
 
 /* TABS */
 .tabs{display:flex;background:white;border-bottom:2px solid var(--borde);}
-.tab{flex:1;padding:11px 8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--texto-sec);text-align:center;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab{flex:1;padding:11px 8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--texto-sec);text-align:center;background:none;border:none;font-family:inherit;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
 .tab.activo{color:var(--azul-med);border-bottom-color:var(--azul-med);}
 .tab:hover:not(.activo){background:var(--gris);}
 
@@ -49,9 +49,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
 .filtros-grid select:focus{border-color:var(--azul-med);}
 
 /* CHIPS ESTABLECIMIENTO */
+.tab:focus-visible,.chip:focus-visible,.btn-limpiar:focus-visible{outline:3px solid var(--azul-med);outline-offset:2px;}
 .chips-label{font-size:11px;font-weight:700;color:var(--texto-sec);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
 .chips{display:flex;gap:6px;flex-wrap:wrap;}
-.chip{padding:5px 13px;border-radius:20px;border:2px solid var(--borde);background:white;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--texto-sec);}
+.chip{padding:5px 13px;border-radius:20px;border:2px solid var(--borde);background:white;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;color:var(--texto-sec);}
 .chip:hover{border-color:var(--azul-med);color:var(--azul-med);}
 .chip.activo-todos {background:var(--texto);   border-color:var(--texto);   color:white;}
 .chip.activo-aps   {background:var(--azul);    border-color:var(--azul);    color:white;}
@@ -138,49 +139,49 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
     <p>Servicio de Salud Valparaíso – San Antonio · 2024–2025</p>
   </div>
   <div class="header-count">
-    <span id="cnt">—</span>
+    <span id="cnt" aria-live="polite">—</span>
     <small id="cnt-label">resultados</small>
   </div>
 </div>
 
 <div class="tabs">
-  <div class="tab activo" id="tab-farm" onclick="cambiarTab('farmacos')">💊 Fármacos</div>
-  <div class="tab"        id="tab-vac"  onclick="cambiarTab('vacunas')">💉 Vacunas</div>
+  <button type="button" class="tab activo" id="tab-farm" aria-pressed="true"  onclick="cambiarTab('farmacos')">💊 Fármacos</button>
+  <button type="button" class="tab"        id="tab-vac"  aria-pressed="false" onclick="cambiarTab('vacunas')">💉 Vacunas</button>
 </div>
 
 <div class="filtros-wrap">
   <div class="busqueda">
-    <input id="busq" type="search" placeholder="🔍  Buscar nombre, forma, observación…" oninput="filtrar()">
+    <input id="busq" type="search" aria-label="Buscar por nombre, forma u observación" placeholder="🔍  Buscar nombre, forma, observación…" oninput="filtrar()">
   </div>
 
 
   <!-- Filtros fármacos -->
   <div id="filtros-farm">
     <div class="filtros-grid">
-      <select id="sel-cat"         onchange="filtrar()"><option value="">Todas las categorías</option></select>
-      <select id="sel-forma"       onchange="filtrar()"><option value="">Todas las formas farmacéuticas</option></select>
-      <select id="sel-prof"        onchange="filtrar()">
+      <select id="sel-cat"         aria-label="Categoría" onchange="filtrar()"><option value="">Todas las categorías</option></select>
+      <select id="sel-forma"       aria-label="Forma farmacéutica" onchange="filtrar()"><option value="">Todas las formas farmacéuticas</option></select>
+      <select id="sel-prof"        aria-label="Profesional que prescribe" onchange="filtrar()">
         <option value="">Todos los profesionales</option>
         <option value="MG">Médico General (MG)</option>
         <option value="ME">Médico Especialista (ME)</option>
         <option value="CD">Cirujano Dentista (CD)</option>
         <option value="MAT">Matrona (MAT)</option>
       </select>
-      <select id="sel-restriccion" onchange="filtrar()">
+      <select id="sel-restriccion" aria-label="Restricción de especialista" onchange="filtrar()">
         <option value="">Con y sin restricción</option>
         <option value="si">Solo con restricción (ME)</option>
         <option value="no">Sin restricción de especialista</option>
       </select>
-      <button class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
+      <button type="button" class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
     </div>
-    <div class="chips-label">Filtrar por establecimiento:</div>
-    <div class="chips" id="chips-farm">
-      <span class="chip activo-todos" id="chip-todos" onclick="toggleTodos()">Todos</span>
-      <span class="chip" id="chip-aps"   onclick="toggleChip('aps')"  >🏥 APS</span>
-      <span class="chip" id="chip-sapu"  onclick="toggleChip('sapu')" >🚑 SAPU</span>
-      <span class="chip" id="chip-sar"   onclick="toggleChip('sar')"  >🏨 SAR</span>
-      <span class="chip" id="chip-sur"   onclick="toggleChip('sur')"  >🏩 SUR</span>
-      <span class="chip" id="chip-cecof" onclick="toggleChip('cecof')">🏘️ CECOF</span>
+    <div class="chips-label" id="lbl-chips-farm">Filtrar por establecimiento:</div>
+    <div class="chips" id="chips-farm" role="group" aria-labelledby="lbl-chips-farm">
+      <button type="button" class="chip activo-todos" id="chip-todos" aria-pressed="true" onclick="toggleTodos()">Todos</button>
+      <button type="button" class="chip" id="chip-aps"   aria-pressed="false" onclick="toggleChip('aps')"  >🏥 APS</button>
+      <button type="button" class="chip" id="chip-sapu"  aria-pressed="false" onclick="toggleChip('sapu')" >🚑 SAPU</button>
+      <button type="button" class="chip" id="chip-sar"   aria-pressed="false" onclick="toggleChip('sar')"  >🏨 SAR</button>
+      <button type="button" class="chip" id="chip-sur"   aria-pressed="false" onclick="toggleChip('sur')"  >🏩 SUR</button>
+      <button type="button" class="chip" id="chip-cecof" aria-pressed="false" onclick="toggleChip('cecof')">🏘️ CECOF</button>
     </div>
     <div class="leyenda">
       <strong>Profesional:</strong>
@@ -193,21 +194,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
   <!-- Filtros vacunas -->
   <div id="filtros-vac" style="display:none">
     <div class="filtros-grid">
-      <select id="sel-vac-tipo" onchange="filtrar()">
+      <select id="sel-vac-tipo" aria-label="Tipo de vacuna" onchange="filtrar()">
         <option value="">Todos los tipos</option>
         <option value="Campaña de Invierno">Campaña de Invierno</option>
         <option value="VACUNA / INMUNOGLOBULINA">Vacunas e Inmunoglobulinas</option>
       </select>
-      <button class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
+      <button type="button" class="btn-limpiar" onclick="limpiar()">✕ Limpiar filtros</button>
     </div>
-    <div class="chips-label">Filtrar por establecimiento:</div>
-    <div class="chips" id="chips-vac">
-      <span class="chip activo-todos" id="chip-vac-todos" onclick="toggleTodos()">Todos</span>
-      <span class="chip" id="chip-vac-aps"   onclick="toggleChip('aps')"  >🏥 APS</span>
-      <span class="chip" id="chip-vac-sapu"  onclick="toggleChip('sapu')" >🚑 SAPU</span>
-      <span class="chip" id="chip-vac-sar"   onclick="toggleChip('sar')"  >🏨 SAR</span>
-      <span class="chip" id="chip-vac-sur"   onclick="toggleChip('sur')"  >🏩 SUR</span>
-      <span class="chip" id="chip-vac-cecof" onclick="toggleChip('cecof')">🏘️ CECOF</span>
+    <div class="chips-label" id="lbl-chips-vac">Filtrar por establecimiento:</div>
+    <div class="chips" id="chips-vac" role="group" aria-labelledby="lbl-chips-vac">
+      <button type="button" class="chip activo-todos" id="chip-vac-todos" aria-pressed="true" onclick="toggleTodos()">Todos</button>
+      <button type="button" class="chip" id="chip-vac-aps"   aria-pressed="false" onclick="toggleChip('aps')"  >🏥 APS</button>
+      <button type="button" class="chip" id="chip-vac-sapu"  aria-pressed="false" onclick="toggleChip('sapu')" >🚑 SAPU</button>
+      <button type="button" class="chip" id="chip-vac-sar"   aria-pressed="false" onclick="toggleChip('sar')"  >🏨 SAR</button>
+      <button type="button" class="chip" id="chip-vac-sur"   aria-pressed="false" onclick="toggleChip('sur')"  >🏩 SUR</button>
+      <button type="button" class="chip" id="chip-vac-cecof" aria-pressed="false" onclick="toggleChip('cecof')">🏘️ CECOF</button>
     </div>
   </div>
 </div>
@@ -249,6 +250,8 @@ function cambiarTab(tab) {
   TAB = tab;
   document.getElementById('tab-farm').className = tab==='farmacos' ? 'tab activo' : 'tab';
   document.getElementById('tab-vac').className  = tab==='vacunas'  ? 'tab activo' : 'tab';
+  document.getElementById('tab-farm').setAttribute('aria-pressed', tab==='farmacos');
+  document.getElementById('tab-vac').setAttribute('aria-pressed', tab==='vacunas');
   document.getElementById('filtros-farm').style.display = tab==='farmacos' ? '' : 'none';
   document.getElementById('filtros-vac').style.display  = tab==='vacunas'  ? '' : 'none';
   document.getElementById('busq').value = '';
@@ -287,9 +290,13 @@ function actualizarChips() {
     const el = document.getElementById(`chip-${prefix}${id}`);
     if (!el) return;
     el.className = CHIPS.has(id) ? `chip activo-${id}` : 'chip';
+    el.setAttribute('aria-pressed', CHIPS.has(id));
   });
   const todosEl = document.getElementById(todosId);
-  if (todosEl) todosEl.className = CHIPS.has('todos') ? 'chip activo-todos' : 'chip';
+  if (todosEl) {
+    todosEl.className = CHIPS.has('todos') ? 'chip activo-todos' : 'chip';
+    todosEl.setAttribute('aria-pressed', CHIPS.has('todos'));
+  }
 }
 
 // ══════════════════════════════
