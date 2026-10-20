@@ -118,7 +118,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f7;color:var(--
   .header-text h1{font-size:13px;}
   .filtros-grid{grid-template-columns:1fr 1fr;}
   .main{padding:10px 8px;}
-  .farm-top{grid-template-columns:1fr 1fr auto !important;}
+  .farm-top{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto !important;}
+  .filtros-grid select{min-width:0;width:100%;}
+  .farm-nombre,.farm-forma,.farm-dosis{overflow-wrap:anywhere;}
+  .farm-dosis{max-width:110px;}
   .farm-nombre-box{padding:8px 10px;}
   .farm-forma-box{padding:8px 10px;}
   .farm-nombre{font-size:12px;}
